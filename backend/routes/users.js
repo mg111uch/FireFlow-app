@@ -1,13 +1,13 @@
 // y
 const express = require('express');
 const db = require('../database');
-const { authenticateToken } = require('../middleware/auth');
+const { authenticateToken, optionalAuthenticateToken } = require('../middleware/auth');
 const { getPostQueryFields } = require('../utils/postQueries');
 
 const router = express.Router();
 
 // GET user profile by ID
-router.get('/:id', authenticateToken, (req, res) => {
+router.get('/:id', optionalAuthenticateToken, (req, res) => {
   const { id } = req.params;
   const loggedInUserId = req.user?.id; // The ID of the user making the request
 
@@ -42,14 +42,14 @@ router.get('/:id', authenticateToken, (req, res) => {
 });
 
 // GET all posts made by a specific user
-router.get('/:userId/posts', authenticateToken, (req, res) => {
+router.get('/:userId/posts', optionalAuthenticateToken, (req, res) => {
   const { userId } = req.params;
 
   const query = `
     SELECT ${getPostQueryFields(req.user?.id)}
     FROM posts p
     JOIN users u ON p.user_id = u.id
-    JOIN communities c ON p.community_id = c.id
+    LEFT JOIN communities c ON p.community_id = c.id
     LEFT JOIN votes v ON p.id = v.post_id
     WHERE p.user_id = ?
     GROUP BY p.id
@@ -138,7 +138,7 @@ router.get('/saved-posts', authenticateToken, (req, res) => {
         SELECT ${getPostQueryFields(userId)}
         FROM posts p
         JOIN users u ON p.user_id = u.id
-        JOIN communities c ON p.community_id = c.id
+        LEFT JOIN communities c ON p.community_id = c.id
         LEFT JOIN votes v ON p.id = v.post_id
         JOIN saved_posts sp ON p.id = sp.post_id
         WHERE sp.user_id = ?
@@ -169,6 +169,34 @@ router.get('/saved-comments', authenticateToken, (req, res) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
     });
+});
+
+// GET followers list for a user
+router.get('/:id/followers', (req, res) => {
+  const { id } = req.params;
+  db.all(`
+    SELECT u.id, u.username FROM users u
+    JOIN followers f ON f.follower_id = u.id
+    WHERE f.following_id = ?
+    ORDER BY u.username ASC
+  `, [id], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// GET following list for a user
+router.get('/:id/following', (req, res) => {
+  const { id } = req.params;
+  db.all(`
+    SELECT u.id, u.username FROM users u
+    JOIN followers f ON f.following_id = u.id
+    WHERE f.follower_id = ?
+    ORDER BY u.username ASC
+  `, [id], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
 });
 
 module.exports = (io, onlineUsers) => {

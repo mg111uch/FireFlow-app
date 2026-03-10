@@ -6,7 +6,7 @@ const db = require('../database');
 jest.mock('../database');
 
 const authenticateToken = (req, res, next) => {
-    req.user = { id: 1, username: 'testuser' };
+    req.user = { id: 1, username: 'manigupt' };
     next();
 };
 
@@ -39,6 +39,24 @@ app.get('/api/forms/:formId', (req, res) => {
         if (err || !form) return res.status(404).json({ error: 'Form not found.' });
         res.json(form);
     });
+});
+
+// Test Forms Submit with Payment
+app.post('/api/forms/:formId/submit', (req, res) => {
+    const { formId } = req.params;
+    const { answers, paymentDetails } = req.body;
+    
+    if (!answers || !Array.isArray(answers) || answers.length === 0) {
+        return res.status(400).json({ error: 'Answers are required.' });
+    }
+    
+    // If paymentDetails exists, verify payment was successful
+    if (paymentDetails && paymentDetails.status !== 'success') {
+        return res.status(400).json({ error: 'Payment not completed.' });
+    }
+    
+    // Mock submission
+    res.status(201).json({ message: 'Form submitted successfully!', submissionId: 123 });
 });
 
 describe('Form API Endpoints', () => {
@@ -95,6 +113,99 @@ describe('Form API Endpoints', () => {
             const res = await request(app).get('/api/forms/999');
 
             expect(res.statusCode).toEqual(404);
+        });
+    });
+
+    // ============================================
+    // Form Submission with Payment Tests
+    // ============================================
+    
+    describe('POST /api/forms/:formId/submit', () => {
+        it('should submit form successfully without payment (free form)', async () => {
+            const res = await request(app)
+                .post('/api/forms/1/submit')
+                .send({
+                    answers: [
+                        { questionId: 1, answerText: 'Test Answer 1' },
+                        { questionId: 2, answerText: 'Test Answer 2' }
+                    ]
+                });
+
+            expect(res.statusCode).toEqual(201);
+            expect(res.body).toHaveProperty('message', 'Form submitted successfully!');
+            expect(res.body).toHaveProperty('submissionId');
+        });
+
+        it('should submit form successfully with payment details', async () => {
+            const res = await request(app)
+                .post('/api/forms/1/submit')
+                .send({
+                    answers: [
+                        { questionId: 1, answerText: 'Test Answer 1' }
+                    ],
+                    paymentDetails: {
+                        transactionId: 'gpay_123456789',
+                        status: 'success',
+                        method: 'Google Pay'
+                    }
+                });
+
+            expect(res.statusCode).toEqual(201);
+            expect(res.body).toHaveProperty('message', 'Form submitted successfully!');
+            expect(res.body).toHaveProperty('submissionId');
+        });
+
+        it('should return 400 if answers are missing', async () => {
+            const res = await request(app)
+                .post('/api/forms/1/submit')
+                .send({});
+
+            expect(res.statusCode).toEqual(400);
+            expect(res.body).toHaveProperty('error', 'Answers are required.');
+        });
+
+        it('should return 400 if answers array is empty', async () => {
+            const res = await request(app)
+                .post('/api/forms/1/submit')
+                .send({ answers: [] });
+
+            expect(res.statusCode).toEqual(400);
+            expect(res.body).toHaveProperty('error', 'Answers are required.');
+        });
+
+        it('should return 400 if payment failed', async () => {
+            const res = await request(app)
+                .post('/api/forms/1/submit')
+                .send({
+                    answers: [
+                        { questionId: 1, answerText: 'Test Answer' }
+                    ],
+                    paymentDetails: {
+                        transactionId: 'failed_txn_123',
+                        status: 'failed'
+                    }
+                });
+
+            expect(res.statusCode).toEqual(400);
+            expect(res.body).toHaveProperty('error', 'Payment not completed.');
+        });
+
+        it('should submit with mock UPI payment', async () => {
+            const res = await request(app)
+                .post('/api/forms/1/submit')
+                .send({
+                    answers: [
+                        { questionId: 1, answerText: 'Test Answer' }
+                    ],
+                    paymentDetails: {
+                        transactionId: 'mock_upi_987654321',
+                        status: 'success',
+                        method: 'Mock UPI'
+                    }
+                });
+
+            expect(res.statusCode).toEqual(201);
+            expect(res.body).toHaveProperty('message', 'Form submitted successfully!');
         });
     });
 

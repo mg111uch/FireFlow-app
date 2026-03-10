@@ -1,7 +1,6 @@
-// y
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, use, useRef } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { Market, MarketOption, MarketTrade } from '../../../lib/types';
@@ -21,7 +20,7 @@ export default function MarketDetailPage({ params }: { params: Promise<{ marketI
   const [selectedOptionId, setSelectedOptionId] = useState<number | null>(null);
   const [tradeAmount, setTradeAmount] = useState<number>(1); // Default trade amount
   const [submittingTrade, setSubmittingTrade] = useState(false);
-  const socketRef = useState<Socket | null>(null);
+  const socketRef = useRef<Socket | null>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => {
@@ -50,6 +49,10 @@ export default function MarketDetailPage({ params }: { params: Promise<{ marketI
 
     socketRef.current.on('disconnect', () => {
       console.log('Disconnected from market detail WebSocket');
+    });
+
+    socketRef.current.on('connect_error', (err: any) => {
+      console.error('Socket connection error:', err.message);
     });
 
     socketRef.current.on('marketUpdate', (data: { marketId: number; options: MarketOption[] }) => {
@@ -146,83 +149,83 @@ export default function MarketDetailPage({ params }: { params: Promise<{ marketI
         <h2 className="text-xl font-semibold mb-3 text-blue-400">Current Probabilities</h2>
         <div className="space-y-3">
           {market.options.map(option => (
-            <div key={option.id} className="bg-gray-700 p-3 rounded-md flex justify-between items-center">
-              <span className="text-lg text-gray-200">{option.option_text}</span>
+            <div 
+              key={option.id} 
+              onClick={() => setSelectedOptionId(option.id)}
+              className={`bg-gray-700 p-3 rounded-md flex justify-between items-center cursor-pointer transition-all ${
+                selectedOptionId === option.id 
+                  ? 'ring-2 ring-blue-500 bg-gray-600' 
+                  : 'hover:bg-gray-650'
+              }`}
+            >
+              <div className="flex items-center space-x-3">
+                <input
+                  type="radio"
+                  name="market_option"
+                  value={option.id}
+                  checked={selectedOptionId === option.id}
+                  onChange={() => setSelectedOptionId(option.id)}
+                  className="form-radio h-5 w-5 text-blue-600"
+                />
+                <span className="text-lg text-gray-200">{option.option_text}</span>
+              </div>
               <span className="text-2xl font-bold text-green-400">{option.probability?.toFixed(2) || 0}%</span>
             </div>
           ))}
         </div>
-      </div>
 
-      {currentUser ? (
-        <div className="bg-gray-800 p-4 rounded-lg shadow-md mt-6">
-          <h2 className="text-xl font-semibold mb-3 text-white">Your Prediction</h2>
-          {market.user_trades && market.user_trades.length > 0 && (
-            <div className="mb-4">
-              <p className="text-gray-300 mb-2">You have contributed a total of <span className="font-bold text-yellow-400">{totalUserAmount}</span> to this market.</p>
-              <ul className="list-disc list-inside text-gray-400">
-                {market.user_trades.map((trade, index) => {
-                  const option = market.options.find(opt => opt.id === trade.option_id);
-                  return (
-                    <li key={index}>
-                      {option?.option_text}: {trade.amount}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          )}
-          {error && <p className="text-red-500 mb-4">{error}</p>}
-          <form onSubmit={handlePlaceTrade} className="space-y-4">
-            <div>
-              <label className="block text-gray-300 font-bold mb-2">Select Option:</label>
-              <div className="grid grid-cols-1 gap-2">
-                {market.options.map(option => (
-                  <label key={option.id} className="flex items-center space-x-2 text-gray-200 bg-gray-700 p-3 rounded-md hover:bg-gray-600 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="market_option"
-                      value={option.id}
-                      checked={selectedOptionId === option.id}
-                      onChange={() => setSelectedOptionId(option.id)}
-                      className="form-radio h-5 w-5 text-blue-600"
-                      required
-                    />
-                    <span>{option.option_text}</span>
-                  </label>
-                ))}
+        {currentUser && (
+          <>
+            {market.user_trades && market.user_trades.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-600">
+                <p className="text-gray-300 mb-2">You have contributed a total of <span className="font-bold text-yellow-400">{totalUserAmount}</span> to this market.</p>
+                <ul className="list-disc list-inside text-gray-400">
+                  {market.user_trades.map((trade, index) => {
+                    const option = market.options.find(opt => opt.id === trade.option_id);
+                    return (
+                      <li key={index}>
+                        {option?.option_text}: {trade.amount}
+                      </li>
+                    );
+                  })}
+                </ul>
               </div>
-            </div>
-            <div>
-              <label htmlFor="tradeAmount" className="block text-gray-300 font-bold mb-2">Amount (Your Conviction/Weight):</label>
-              <input
-                type="number"
-                id="tradeAmount"
-                value={tradeAmount}
-                onChange={(e) => setTradeAmount(parseFloat(e.target.value))}
-                min="1"
-                step="0.01"
-                className="border p-2 w-full rounded-md text-gray-300"
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white px-6 py-3 rounded-md text-lg font-bold hover:bg-blue-700"
-              disabled={submittingTrade}
-            >
-              {submittingTrade ? 'Placing Trade...' : 'Place Trade'}
-            </button>
-          </form>
-        </div>
-      ) : (
-        <div className="bg-gray-800 p-4 rounded-lg shadow-md mt-6 text-center">
-          <p className="text-gray-300 mb-4">Log in to place your prediction on this market!</p>
-          <Link href="/login" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-            Log In
-          </Link>
-        </div>
-      )}
+            )}
+            {error && <p className="text-red-500 mt-4">{error}</p>}
+            <form onSubmit={handlePlaceTrade} className="mt-4 space-y-4">
+              <div>
+                <label htmlFor="tradeAmount" className="block text-gray-300 font-bold mb-2">Amount (Your Conviction/Weight):</label>
+                <input
+                  type="number"
+                  id="tradeAmount"
+                  value={tradeAmount}
+                  onChange={(e) => setTradeAmount(parseFloat(e.target.value))}
+                  min="1"
+                  step="0.01"
+                  className="border p-2 w-full rounded-md text-gray-300"
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white px-6 py-3 rounded-md text-lg font-bold hover:bg-blue-700"
+                disabled={submittingTrade}
+              >
+                {submittingTrade ? 'Placing Trade...' : 'Place Trade'}
+              </button>
+            </form>
+          </>
+        )}
+
+        {!currentUser && (
+          <div className="mt-4 pt-4 border-t border-gray-600 text-center">
+            <p className="text-gray-300 mb-4">Log in to place your prediction on this market!</p>
+            <Link href="/login" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+              Log In
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

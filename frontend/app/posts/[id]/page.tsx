@@ -1,4 +1,3 @@
-// y
 'use client';
 
 import { useState, useEffect, use, useCallback, useRef  } from 'react';
@@ -8,7 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Comment } from '@/lib/types';
 import { usePosts } from '@/context/PostContext';
 import PostCard from '@/components/PostCard';
-import CommentCard from '@/components/CommentCard';
+import CommentCard from '../CommentCard';
 
 const APP_URL = process.env.NEXT_PUBLIC_URL;
 
@@ -54,7 +53,7 @@ export default function PostDetail({ params }: { params: Promise<{ id: string }>
 
   const [comments, setComments] = useState<CommentWithReplies[]>([]);
   const [newComment, setNewComment] = useState('');
-  const [replyTo, setReplyTo] = useState<number | null>(null);
+  const [replyTo, setReplyTo] = useState<Comment | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingComments, setLoadingComments] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,7 +85,7 @@ export default function PostDetail({ params }: { params: Promise<{ id: string }>
           ...c,
           loadedReplies: [],
           repliesPage: 1,
-          hasMoreReplies: c.reply_count > 0,
+          hasMoreReplies: (c.reply_count ?? 0) > 0,
         }));
   
         setComments(prev => (page === 1 ? newComments : [...prev, ...newComments]));
@@ -126,7 +125,7 @@ export default function PostDetail({ params }: { params: Promise<{ id: string }>
             ...r,
             loadedReplies: [],
             repliesPage: 1,
-            hasMoreReplies: r.reply_count > 0,
+            hasMoreReplies: (r.reply_count ?? 0) > 0,
         }));
         
         setComments(prevComments => prevComments.map(c => {
@@ -238,8 +237,8 @@ export default function PostDetail({ params }: { params: Promise<{ id: string }>
     document.getElementById('comment-textarea')?.focus();
   };
 
-  const observer = useRef<IntersectionObserver>();
-  const lastCommentElementRef = useCallback(node => {
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastCommentElementRef = useCallback((node: Element | null) => {
     if (loadingComments) return;
     if (observer.current) observer.current.disconnect();
     observer.current = new IntersectionObserver(entries => {

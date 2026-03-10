@@ -2,7 +2,7 @@
 // Reusable SQL for Post Details
 // This avoids repeating the same complex JOINs and subqueries in multiple routes.
 const getPostQueryFields = (userId) => `
-  p.id, p.title, p.content, p.user_id, p.community_id, p.image_url, p.created_at,
+  p.id, p.title, p.content, p.user_id, p.community_id, p.image_url, p.created_at, p.repost_count, p.original_post_id,
   u.username,
   c.name as community_name,
   COALESCE(SUM(CASE WHEN v.vote_type = 1 THEN 1 ELSE 0 END), 0) AS upvotes,

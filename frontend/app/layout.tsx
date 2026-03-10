@@ -1,5 +1,3 @@
-// y
-
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -38,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <NotificationProvider>
               <PostProvider>  
                 <TopAppBar /> 
-                <div className="pt-16 pb-16">                
+                <div className="pt-16 pb-20">                
                   {children}                  
                 </div> 
                 <BottomAppBar /> 

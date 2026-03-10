@@ -4,10 +4,10 @@
 
 - **Add markers:** `cd /home/manigupt/Hello/python/ai_agent/atlas_output && python add_markers.py --md_file /home/manigupt/Hello/React/reddit-clone/code_atlas.md --project_path "/home/manigupt/Hello/React/reddit-clone"`
 
-- **Codebase size:** `cd /home/manigupt/Hello/python/ai_agent/atlas_output/tools && conda run -n myenv python codebase_size.py --directory /home/manigupt/Hello/React/reddit-clone --extensions .js .ts .tsx .json --output-file /home/manigupt/Hello/React/reddit-clone/code_atlas.md --start-marker "## Codebase size" --end-marker "## End Codebase size" --ignore-dir node_modules .git .next public images uploads --ignore-files package-lock.json .gitignore .env eslint.config.mjs manifest.json next.config.ts tsconfig.json postcss.config.mjs next-env.d.ts favicon.ico`
+- **Codebase size:** `cd /home/manigupt/Hello/python/ai_agent/atlas_output/tools && conda run -n myenv python codebase_size.py --directory /home/manigupt/Hello/React/reddit-clone --extensions .js .ts .tsx .json --output-file /home/manigupt/Hello/React/reddit-clone/code_atlas.md --start-marker "## Codebase size" --end-marker "## End Codebase size" --ignore-dir node_modules .git .next public images uploads --ignore-files package-lock.json .gitignore .env eslint.config.mjs manifest.json next.config.ts tsconfig.json tsconfig.tsbuildinfo postcss.config.mjs next-env.d.ts favicon.ico jest.config.js jest.setup.js README.md playwright.config.ts`
 
 - **Make directory:** 
-`cd /home/manigupt/Hello/python/ai_agent/atlas_output/tools && conda run -n myenv python make_directree.py --reverse --base_path /home/manigupt/Hello/React/reddit-clone --md_file /home/manigupt/Hello/React/reddit-clone/code_atlas.md --start_marker '### FILE_MAP Tree' --end_marker '### End Tree' --ignore_dir node_modules .git .next public images uploads --ignore_files package-lock.json .gitignore .env eslint.config.mjs manifest.json next.config.ts tsconfig.json postcss.config.mjs next-env.d.ts favicon.ico`
+`cd /home/manigupt/Hello/python/ai_agent/atlas_output/tools && conda run -n myenv python make_directree.py --reverse --base_path /home/manigupt/Hello/React/reddit-clone --md_file /home/manigupt/Hello/React/reddit-clone/code_atlas.md --start_marker '### FILE_MAP Tree' --end_marker '### End Tree' --ignore_dir node_modules .git .next public images uploads --ignore_files package-lock.json .gitignore .env eslint.config.mjs manifest.json next.config.ts tsconfig.json tsconfig.tsbuildinfo postcss.config.mjs next-env.d.ts favicon.ico jest.config.js jest.setup.js README.md playwright.config.ts`
 
 - **Copy Content:** `cd /home/manigupt/Hello/python/ai_agent/atlas_output/tools && conda run -n myenv python copyContent.py --mode dump --md_file /home/manigupt/Hello/React/reddit-clone/code_atlas.md --base_path /home/manigupt/Hello/React/reddit-clone --output_file /home/manigupt/Hello/React/reddit-clone/code_dump.txt --start_marker '### FILE_MAP Tree' --end_marker '### End Tree'`
 
@@ -23,6 +23,6 @@
 
 - **Ask Gemini:** `cd /home/manigupt/Hello/python/ai_agent/agent_tools && export $(cat .env | xargs) && conda run -n myenv python reason_video.py --video_file /home/manigupt/Hello/python/ai_agent/videos/reddit-clone.avi --response_file /home/manigupt/Hello/React/reddit-clone/video_test.md`
 
-- **Execute in order:** `cd /home/manigupt/Hello/python/ai_agent/atlas_output && python run_cmds.py /home/manigupt/Hello/React/reddit-clone/project_tools.md "Make Codebase_atlas" "Add markers" "Codebase size" "Make directory" "Count Tokens in file"`
+- **Execute in order:** `cd /home/manigupt/Hello/python/ai_agent/atlas_output/tools && python run_cmds.py /home/manigupt/Hello/React/reddit-clone/project_tools.md "Make Codebase_atlas" "Add markers" "Codebase size" "Make directory" "Count Tokens in file"`
 
 

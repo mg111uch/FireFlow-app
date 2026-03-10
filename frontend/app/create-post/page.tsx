@@ -1,14 +1,19 @@
-// y
 'use client';
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Community } from '../../lib/types';
+import Tabs from '../../components/ui/Tabs';
+import CreateMarketForm from './CreateMarketForm';
+import CreateServicePage from './CreateServicePage';
 
 const APP_URL = process.env.NEXT_PUBLIC_URL;
 
 export default function CreatePostPage() {
+  const [postType, setPostType] = useState<'community' | 'general'>('general');
+  const [parentTab, setParentTab] = useState<'posts' | 'vote' | 'forms'>('posts');
+  const [activeTab, setActiveTab] = useState<'general' | 'community' | 'vote'>('general');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [communityId, setCommunityId] = useState('');
@@ -17,6 +22,19 @@ export default function CreatePostPage() {
   const [error, setError] = useState<string|null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // Parent Tab change handler
+  const handleParentTabChange = (value: string) => {
+    setParentTab(value as 'posts' | 'vote' | 'forms');
+    if (value === 'vote') {
+      setActiveTab('vote');
+    } else if (value === 'forms') {
+      setActiveTab('general');
+    } else {
+      setActiveTab('general');
+      setPostType('general');
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -53,9 +71,19 @@ export default function CreatePostPage() {
     }
 
     const formData = new FormData();
-    formData.append('title', title);
-    formData.append('content', content);
-    formData.append('community_ids', communityId);
+    
+    if (postType === 'general') {
+      // General post: content + optional image (no title, no community)
+      formData.append('post_type', 'general');
+      formData.append('content', content);
+    } else {
+      // Community post: requires title + community
+      formData.append('post_type', 'community');
+      formData.append('title', title);
+      formData.append('community_id', communityId);
+      formData.append('content', content);
+    }
+    
     if (image) {
         formData.append('image', image);
     }
@@ -76,69 +104,101 @@ export default function CreatePostPage() {
   };
 
   return (
-    <div className="container mx-auto p-2">
-
-      <button onClick={() => router.back()} className="bg-gray-600 text-white mb-4 px-4 py-2 rounded-md">
-        Go Back
-      </button>
-
-      <h1 className="text-2xl font-bold mb-4">Create New Post</h1>
-      
-      <form onSubmit={handleCreatePost} className="mb-4 bg-gray-800 p-4 rounded-lg">
+    <div className="container mx-auto"> 
         
-        <div className="mb-4">
-          <label className="block text-gray-300 font-bold mb-2">Select Community :</label>
+      {/* Parent Tab Component - Posts, Vote, Forms */}
+      <Tabs
+        tabs={[
+          { label: 'Posts', value: 'posts' },
+          { label: 'Vote', value: 'vote' },
+          { label: 'Forms', value: 'forms' }
+        ]}
+        activeTab={parentTab}
+        onChange={handleParentTabChange}
+      />
+      
+      {/* Content based on parent tab */}
+      {parentTab === 'vote' ? (
+        <CreateMarketForm />
+      ) : parentTab === 'forms' ? (
+        <CreateServicePage />
+      ) : (
+        <>
+      {/* Child Tab Component - General, Community (only shown for Posts) */}
+      <Tabs
+        tabs={[
+          { label: 'General', value: 'general' },
+          { label: 'Community', value: 'community' },
+        ]}
+        activeTab={activeTab}
+        onChange={(value) => {
+          setActiveTab(value as 'general' | 'community');
+          setPostType(value as 'general' | 'community');
+        }}
+      />
+        <form onSubmit={handleCreatePost} className="mb-4 bg-gray-900 p-3">
+          
+          {/* Community selector - only for community posts */}
+          {postType === 'community' && (
+            <div className="mb-2">
+              <label className="block text-gray-300 font-bold mb-2">Select Community :</label>
 
-          <select
-            value={communityId}
-            onChange={(e) => setCommunityId(e.target.value)}
-            className="border p-2 mb-2 w-full rounded-md"
-            required
-          >
-            <option value="">Select a community</option>
-            {communities.map((community) => (
-              <option key={community.id} value={community.id} className="text-black">
-                {community.name}
-              </option>
-            ))}
-          </select>
-        </div>
+              <select
+                value={communityId}
+                onChange={(e) => setCommunityId(e.target.value)}
+                className="border p-2 mb-2 w-full rounded-md"
+                required={postType === 'community'}
+              >
+                <option value="">Select a community</option>
+                {communities.map((community) => (
+                  <option key={community.id} value={community.id} className="text-black">
+                    {community.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
-        <div className="mb-4">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Post title"
-            className="border p-2 mb-2 w-full rounded-md"
-            required
-          />
-        </div>
+          {/* Title - only for community posts */}
+          {postType === 'community' && (
+            <div className="mb-2">
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Post title"
+                className="border p-2 mb-2 w-full rounded-md"
+                required={postType === 'community'}
+              />
+            </div>
+          )}
 
-        <div className="mb-2">
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Post content"
-            className="border p-2 mb-2 w-full rounded-md"
-            rows={5}
-            required
-          />
-        </div>
+          <div className="mb-2">
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder={postType === 'general' ? "What's on your mind?" : "Post content"}
+              className="border p-2 w-full rounded-md"
+              rows={5}
+              required
+            />
+          </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-300 font-bold mb-2">Image (optional)</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImage(e.target.files ? e.target.files[0] : null)}
-            className="border p-2 mb-2 w-full rounded-md"
-          />
-        </div>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md">
-          Create Post
-        </button>
-      </form>
+          <div className="mb-2">
+            <label className="block text-gray-300 font-bold mb-2">Image (optional)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImage(e.target.files ? e.target.files[0] : null)}
+              className="border p-2 mb-2 w-full rounded-md"
+            />
+          </div>
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md">
+            Create Post
+          </button>
+        </form>
+        </>
+      )}
     </div>
   );
 }

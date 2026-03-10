@@ -1,17 +1,37 @@
-// y
 'use client'; 
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { APP_NAME } from '@/lib/constants';
 import { useNotification } from '@/context/NotificationContext';
+import { NotificationIcon, MenuIcon, BackIcon } from '@/lib/icons';
+
+// Define main tab routes
+const MAIN_TABS = ['/', '/chats', '/search', '/services', '/profile'];
 
 export default function TopAppBar() {
     const { unreadCount } = useNotification();
+    const pathname = usePathname();
+    
+    // Check if current route is a main tab
+    const isMainTab = MAIN_TABS.includes(pathname);
+    const isInSubPage = !isMainTab;
+  
+  const handleBack = () => {
+    window.history.back();
+  };
+  
   return (
-    <nav className="fixed w-full bg-gray-800  border-b border-gray-200 text-white px-2 py-3 flex justify-between items-center z-10">
+    <nav className="fixed w-full bg-gray-900  border-b border-gray-200 text-white px-2 py-3 flex justify-between items-center z-10">
         
         <div className="relative flex items-center">
-            <img src="/favicon.ico" alt="Description" className="self-center size-8 rounded-md " />
+            {isInSubPage ? (
+                <button onClick={handleBack} className="p-1 hover:bg-gray-700 rounded-md">
+                    <BackIcon className="size-8" />
+                </button>
+            ) : (
+                <img src="/favicon.ico" alt="Description" className="self-center size-8 rounded-md " />
+            )}
             <div className="text-xl font-bold ml-2">{APP_NAME}</div>
         </div>
 
@@ -25,9 +45,7 @@ export default function TopAppBar() {
             </Link>   */}
 
             <Link href="/notifications" className="relative">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-7">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-                </svg>
+                <NotificationIcon className="size-7" />
                 {/* <span className="absolute top-0 right-0 flex h-3 w-3">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
@@ -40,10 +58,7 @@ export default function TopAppBar() {
             </Link>
 
             <Link href="/options" >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" 
-                className="size-8">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                </svg>
+                <MenuIcon className="size-8" />
             </Link>
 
         </div>

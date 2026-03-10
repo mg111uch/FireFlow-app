@@ -40,16 +40,21 @@ const db = new sqlite3.Database(dbPath, (err) => {
       db.run(`
         CREATE TABLE IF NOT EXISTS posts (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          title TEXT NOT NULL,
+          title TEXT,
           content TEXT,
           user_id INTEGER,
           community_id INTEGER,
           image_url TEXT,
+          post_type TEXT DEFAULT 'general',
+          repost_count INTEGER DEFAULT 0,
+          original_post_id INTEGER,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (user_id) REFERENCES users(id),
-          FOREIGN KEY (community_id) REFERENCES communities(id)
+          FOREIGN KEY (community_id) REFERENCES communities(id),
+          FOREIGN KEY (original_post_id) REFERENCES posts(id)
         )
       `);
+
 // n
       // Add Followers table 
       db.run(`
@@ -207,10 +212,17 @@ const db = new sqlite3.Database(dbPath, (err) => {
           title TEXT NOT NULL,
           description TEXT,
           creator_id INTEGER NOT NULL,
+          form_type TEXT DEFAULT 'general',
+          service_name TEXT,
+          subservice_name TEXT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
         )
       `);
+      // Add columns if they don't exist (for existing databases)
+      db.run(`ALTER TABLE forms ADD COLUMN form_type TEXT DEFAULT 'general'`, (err) => {});
+      db.run(`ALTER TABLE forms ADD COLUMN service_name TEXT`, (err) => {});
+      db.run(`ALTER TABLE forms ADD COLUMN subservice_name TEXT`, (err) => {});
 // n
       // Form Questions table
       db.run(`
@@ -294,15 +306,6 @@ const db = new sqlite3.Database(dbPath, (err) => {
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
       `);
-// n
-      // Drop a table
-      // db.run('DROP TABLE IF EXISTS notifications', (err) => {
-      //   if (err) {
-      //     console.error("Error deleting table:", err.message);
-      //   } else {
-      //     console.log("Table deleted successfully (if it existed).");
-      //   }
-      // });
 // y
     });
   }

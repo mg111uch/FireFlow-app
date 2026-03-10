@@ -1,4 +1,3 @@
-// n
 // Main Post type used across the application
 export interface Post {
   id: number;
@@ -6,8 +5,9 @@ export interface Post {
   content?: string;
   user_id: number;
   username: string;
-  community_id: number;
-  community_name: string;
+  community_id: number | null;
+  community_name: string | null;
+  post_type?: 'general' | 'community';
   image_url?: string;
   created_at: string;
   upvotes: number;
@@ -16,8 +16,10 @@ export interface Post {
   views: number;
   is_saved?: boolean;
   user_vote_type?: 1 | -1 | null;
+  repost_count?: number;
+  original_post_id?: number;
 }
-// n
+
 // Community type
 export interface Community {
   id: number;
@@ -27,7 +29,7 @@ export interface Community {
   creator_username?: string; // Optional because not always fetched
   member_count?: number; // Optional because not always fetched
 }
-// n
+
 // Comment type
 export interface Comment {
   id: number;
@@ -45,7 +47,7 @@ export interface Comment {
   is_pinned?: boolean;
   reply_count?: number;
 }
-// y
+
 // User details type
 export interface UserDetails {
   id: number;  
@@ -57,7 +59,7 @@ export interface UserDetails {
   followingCount: number; 
   isFollowing: boolean; 
 }
-// y
+
 // Chat Message type
 export interface Message {
   id: number;
@@ -80,7 +82,6 @@ export interface Reaction {
   emoji: string;
 }
 
-// n
 // Notification type
 export interface Notification {
   id: number;
@@ -93,13 +94,13 @@ export interface Notification {
   sender_username: string;
   post_title: string;
 }
-// n
+
 // Form types
 export interface FormQuestionOption {
   id?: number; // Optional if not yet saved to DB
   option_text: string;
 }
-// n
+
 export interface FormQuestion {
   id?: number; // Optional if not yet saved to DB
   question_text: string;
@@ -107,7 +108,7 @@ export interface FormQuestion {
   order_index?: number; // Backend handles this
   options?: FormQuestionOption[]; // For radio/checkbox
 }
-// n
+
 export interface Form {
   id: number;
   title: string;
@@ -115,9 +116,13 @@ export interface Form {
   creator_id: number;
   creator_username?: string;
   created_at: string;
+  form_type?: 'general' | 'service';
+  service_name?: string;
+  subservice_name?: string;
+  price?: number; // Optional price for paid forms (default 0 = free)
   questions?: FormQuestion[]; // Populated when fetching full form details
 }
-// n
+
 export interface FormSubmission {
   id: number;
   form_id: number;
@@ -126,7 +131,7 @@ export interface FormSubmission {
   submitted_at: string;
   answers: { question_text: string; answer_text: string }[];
 }
-// n
+
 // Prediction Market types
 export interface MarketOption {
   id: number;
@@ -136,12 +141,12 @@ export interface MarketOption {
   amount?: number; // Total 'amount' traded on this option
   probability?: number; // Calculated probability
 }
-// n
+
 export interface MarketTrade {
   option_id: number;
   amount: number;
 }
-// n
+
 export interface Market {
   id: number;
   question: string;
