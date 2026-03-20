@@ -6,6 +6,7 @@ import axios from 'axios';
 import { Form } from '@/lib/types';
 import { formatTimeAgo } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
+import { APP_URL } from '@/lib/config';
 
 interface FormCardProps {
   form: Form;
@@ -34,7 +35,6 @@ export default function FormCard({ form, isOwner, onDeleted }: FormCardProps) {
     setError(null);
 
     try {
-      const APP_URL = process.env.NEXT_PUBLIC_URL;
       await axios.delete(`${APP_URL}/api/forms/${form.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });

@@ -7,7 +7,7 @@ const router = express.Router();
 
 // POST: Create a new form (general form - current user)
 router.post('/', authenticateToken, (req, res) => {
-  const { title, description, questions, form_type, service_name, subservice_name } = req.body;
+  const { title, description, questions, form_type, service_name, subservice_name, form_price } = req.body;
   const creator_id = req.user.id;
 
   // Title is required for general forms
@@ -17,14 +17,15 @@ router.post('/', authenticateToken, (req, res) => {
 
   // Default to general form if not specified
   const finalFormType = form_type || 'general';
+  const finalFormPrice = form_price || 0;
 
   db.serialize(() => {
     db.run('BEGIN TRANSACTION');
 
-    db.run(
-      'INSERT INTO forms (title, description, creator_id, form_type, service_name, subservice_name) VALUES (?, ?, ?, ?, ?, ?)',
-      [title, description, creator_id, finalFormType, service_name || null, subservice_name || null],
-      function (err) {
+     db.run(
+       'INSERT INTO forms (title, description, form_price, creator_id, form_type, service_name, subservice_name) VALUES (?, ?, ?, ?, ?, ?, ?)',
+       [title, description, finalFormPrice, creator_id, finalFormType, service_name || null, subservice_name || null],
+       function (err) {
         if (err) {
           db.run('ROLLBACK');
           return res.status(500).json({ error: err.message });
@@ -103,7 +104,7 @@ router.post('/', authenticateToken, (req, res) => {
 
 // POST: Create a service form (admin only - not necessarily current user)
 router.post('/service', authenticateToken, (req, res) => {
-  const { title, description, questions, service_name, subservice_name, admin_user_id } = req.body;
+  const { title, description, questions, service_name, subservice_name, admin_user_id, form_price } = req.body;
   const current_user_id = req.user.id;
 
   // Check if current user is the specified admin
@@ -123,14 +124,15 @@ router.post('/service', authenticateToken, (req, res) => {
   // Use subservice name as default title if not provided
   const formTitle = title || `${subservice_name} Service Form`;
   const creator_id = admin_user_id;
+  const finalFormPrice = form_price || 0;
 
   db.serialize(() => {
     db.run('BEGIN TRANSACTION');
 
-    db.run(
-      'INSERT INTO forms (title, description, creator_id, form_type, service_name, subservice_name) VALUES (?, ?, ?, ?, ?, ?)',
-      [formTitle, description, creator_id, 'service', service_name, subservice_name],
-      function (err) {
+     db.run(
+       'INSERT INTO forms (title, description, form_price, creator_id, form_type, service_name, subservice_name) VALUES (?, ?, ?, ?, ?, ?, ?)',
+       [formTitle, description, finalFormPrice, creator_id, 'service', service_name, subservice_name],
+       function (err) {
         if (err) {
           db.run('ROLLBACK');
           return res.status(500).json({ error: err.message });
@@ -282,7 +284,7 @@ router.delete('/:formId', authenticateToken, (req, res) => {
 // PUT: Update a form (creator only)
 router.put('/:formId', authenticateToken, (req, res) => {
   const { formId } = req.params;
-  const { title, description, questions } = req.body;
+  const { title, description, questions, form_price } = req.body;
   const creator_id = req.user.id;
 
   // Verify user is the creator of the form
@@ -298,6 +300,8 @@ router.put('/:formId', authenticateToken, (req, res) => {
       return res.status(400).json({ error: 'Form must have at least one question.' });
     }
 
+    const finalFormPrice = form_price || 0;
+
     // Use promises to properly sequence the database operations
     const doTransaction = async () => {
       return new Promise((resolve, reject) => {
@@ -305,11 +309,11 @@ router.put('/:formId', authenticateToken, (req, res) => {
           db.run('BEGIN TRANSACTION', (err) => {
             if (err) return reject(err);
             
-            // Update form metadata first
-            db.run(
-              'UPDATE forms SET title = ?, description = ? WHERE id = ?',
-              [title || form.title, description || form.description, formId],
-              (err) => {
+             // Update form metadata first
+             db.run(
+               'UPDATE forms SET title = ?, description = ?, form_price = ? WHERE id = ?',
+               [title || form.title, description || form.description, finalFormPrice, formId],
+               (err) => {
                 if (err) {
                   db.run('ROLLBACK');
                   return reject(err);
@@ -443,7 +447,7 @@ router.get('/:formId', (req, res) => { // No authentication needed for getting t
 // POST: Submit form answers
 router.post('/:formId/submit', (req, res) => {
   const { formId } = req.params;
-  const { answers } = req.body; // answers is an array of { questionId: number, answerText: string }
+  const { answers, form_price } = req.body; // answers is an array of { questionId: number, answerText: string }
   const submitter_id = req.user ? req.user.id : null; // Allow anonymous submission
 
   if (!answers || !Array.isArray(answers) || answers.length === 0) {
@@ -453,7 +457,7 @@ router.post('/:formId/submit', (req, res) => {
 
   db.serialize(() => {
     db.run('BEGIN TRANSACTION');
-    db.run('INSERT INTO form_submissions (form_id, submitter_id) VALUES (?, ?)', [formId, submitter_id], function (err) {
+    db.run('INSERT INTO form_submissions (form_id, submitter_id, form_price) VALUES (?, ?, ?)', [formId, submitter_id, form_price || 0], function (err) {
       if (err) { db.run('ROLLBACK'); return res.status(500).json({ error: err.message }); }
       const submissionId = this.lastID;
       const insertAnswer = db.prepare('INSERT INTO submission_answers (submission_id, question_id, answer_text) VALUES (?, ?, ?)');

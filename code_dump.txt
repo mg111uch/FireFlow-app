@@ -1,0 +1,187 @@
+
+=== Content of backend/package.json ===
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --watch server.js",
+    "test": "jest"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.1",
+    "razorpay": "^2.9.6",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "jest": "^30.0.4",
+    "supertest": "^7.1.1"
+  }
+}
+
+
+=== Content of backend/app.js ===
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
+const { optionalAuthenticateToken } = require('./middleware/auth');
+
+const app = express();
+
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB file size limit
+  },
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png|gif/;
+    const mimetype = filetypes.test(file.mimetype);
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb('Error: Images Only!');
+  }
+});
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || origin === 'null') return callback(null, true);  // ✅ allow null origin
+    const allowed = [
+      'http://localhost:3000',
+      'https://your-domain.com'];
+    if (allowed.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin '${origin}' not allowed`));
+  },
+  credentials: true,          // required — allows Authorization header through
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.use(express.json());
+app.use(optionalAuthenticateToken);
+app.use('/api-uploads', express.static(path.join(__dirname, '')));
+
+module.exports = app;
+
+=== Content of frontend/package.json ===
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:cypress": "cypress run",
+    "test:cypress:open": "cypress open",
+    "test:cypress:ci": "cypress run --headless"
+  },
+  "dependencies": {
+    "@google-pay/button-react": "^3.2.1",
+    "axios": "^1.9.0",
+    "jwt-decode": "^4.0.0",
+    "next": "15.3.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@playwright/test": "^1.58.2",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "cypress": "^15.12.0",
+    "eslint": "^9",
+    "eslint-config-next": "15.3.3",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0",
+    "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5"
+  }
+}
+
+
+=== Content of frontend/next.config.js ===
+const nextConfig = {
+  allowedDevOrigins: ['http://192.168.50.80:3000'],
+};
+
+module.exports = nextConfig;
+
+
+=== Content of frontend/.env.local ===
+# Frontend url
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+# Backend url
+NEXT_PUBLIC_API_URL=http://localhost:5000
+# NEXT_PUBLIC_URL=http://192.168.50.80:5000
+
+=== Content of frontend/tsconfig.json ===
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+

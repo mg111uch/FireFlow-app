@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode'; 
 import { UserDetails } from '@/lib/types';
 import axios from 'axios';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL
+import { API_URL } from '@/lib/config';
 
 interface AuthContextType {
   currentUser: UserDetails | null;
@@ -65,7 +64,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (loginData: any) => {
     try {
-    const response = await axios.post(`${APP_URL}/api/auth/login`, loginData);
+    const response = await axios.post(`${API_URL}/api/auth/login`, loginData);
     if (response.status === 200) {
       const receivedToken = response.data.token;
       localStorage.setItem('token', receivedToken);

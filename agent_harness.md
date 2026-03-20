@@ -3,7 +3,11 @@
 
 ## TASK
 
-What modifications needed so that the responses listing pattern of Header card and Datacard in `React/reddit-clone/frontend/app/services/[serviceName]/[subserviceName]/page.tsx` is also followed in `React/reddit-clone/frontend/app/services/forms/[formId]/responses/page.tsx`. Should we make a new common `ResponsesCard` in directory `React/reddit-clone/frontend/app/services` which could be used in both files.
+Find why loading callback page `React/reddit-clone/frontend/app/payment/callback/page.tsx` after successful payment gives Type error: Invalid URL {
+  code: 'ERR_INVALID_URL',
+  input: 'null',
+  page: '/payment/callback'
+}. Locate where is input `null` coming from. Find the bug.
 Do not give code, just a concise plan or answer.
 
 

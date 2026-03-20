@@ -97,8 +97,16 @@ npx playwright install chromium
 # Run E2E tests
 npm run test:e2e
 
+# To run only this specific test file
+npm run test:e2e -- payment-flow.spec.ts
+
 # Run E2E tests with UI
 npm run test:e2e:ui
+
+# Note: E2E tests require the app to be running.
+
+# Cypress E2E test in watch mode
+npm run test:cypress:open
 ```
 
 ---
@@ -131,11 +139,11 @@ npm run test:e2e:ui
 The payment flow is implemented in the form fill page:
 
 1. User fills out the form
-2. If form has `price > 0`:
+2. If form has `form_price > 0`:
    - Payment modal opens
    - User completes payment (Google Pay or Mock UPI)
    - On success: Form is submitted with payment details
-3. If form has `price = 0`:
+3. If form has `form_price = 0`:
    - Form is submitted directly
 
 ### Testing Payment Flow
@@ -150,51 +158,3 @@ cd backend && npm test -- forms.test.js
 cd frontend && npm run test:e2e
 ```
 
----
-
-## Environment Variables
-
-### Backend (.env)
-```
-PORT=3001
-DB_PATH=./reddit_clone.db
-```
-
-### Frontend (.env.local)
-```
-NEXT_PUBLIC_URL=http://localhost:3001
-```
-
----
-
-## Common Issues
-
-### Port Already in Use
-
-```bash
-# Find process using port
-lsof -i :3000
-lsof -i :3001
-
-# Kill process
-kill -9 <PID>
-```
-
-### Database Issues
-
-```bash
-# Reset database (deletes all data)
-rm backend/reddit_clone.db
-# Restart backend - will create new database
-```
-
-### Test Failures
-
-```bash
-# Clear Jest cache
-cd frontend && npm test -- --clearCache
-
-# Reinstall dependencies
-rm -rf node_modules package-lock.json
-npm install
-```

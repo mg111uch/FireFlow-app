@@ -7,8 +7,7 @@ import axios from 'axios';
 import { getServiceBySlug, Service, SubService } from '@/lib/services-data';
 import { FormSubmission } from '@/lib/types';
 import ResponsesCard from '@/app/services/ResponsesCard';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 interface SubservicePageProps {
   params: Promise<{
@@ -41,7 +40,7 @@ export default function SubservicePage({ params }: SubservicePageProps) {
     const fetchFormId = async () => {
       setLoadingFormId(true);
       try {
-        const res = await axios.get(`${APP_URL}/api/forms/service/${serviceName}/${subserviceName}`);
+        const res = await axios.get(`${API_URL}/api/forms/service/${serviceName}/${subserviceName}`);
         if (res.data && res.data.id) {
           setFormId(res.data.id);
         }
@@ -63,7 +62,7 @@ export default function SubservicePage({ params }: SubservicePageProps) {
       setLoadingSubmissions(true);
       try {
         // Use public endpoint - no auth required
-        const res = await axios.get(`${APP_URL}/api/forms/${formId}/submissions/public`);
+        const res = await axios.get(`${API_URL}/api/forms/${formId}/submissions/public`);
         setSubmissions(res.data);
       } catch (err: any) {
         console.error('Error fetching submissions:', err);

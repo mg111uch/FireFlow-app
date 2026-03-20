@@ -1,10 +1,11 @@
-// y
+require('dotenv').config();
 const app = require('./app');
 const http = require('http');
 const { Server } = require('socket.io');
 const { format } = require('date-fns');
 const db = require('./database');
 const { getPostQueryFields } = require('./utils/postQueries');
+const { authenticateToken } = require('./middleware/auth');
 
 const PORT = process.env.PORT || 5000;
 
@@ -32,6 +33,8 @@ const io = new Server(server, {
 // Mount routes
 app.use('/api/auth', require('./routes/auth')(io, onlineUsers));
 app.use('/api/posts', require('./routes/posts')(io, onlineUsers));
+app.use('/api/agent', require('./routes/agent')(io, onlineUsers));
+app.use('/api/payments', authenticateToken, require('./routes/payments')(io, onlineUsers));
 app.use('/api/communities', require('./routes/communities')(io, onlineUsers));
 app.use('/api/users', require('./routes/users')(io, onlineUsers));
 app.use('/api/notifications', require('./routes/notifications')(io, onlineUsers));

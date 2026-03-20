@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { APP_URL } from '@/lib/config';
 
 export default function ResetPasswordPage() {
     const router = useRouter();

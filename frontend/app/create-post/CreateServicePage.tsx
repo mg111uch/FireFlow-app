@@ -22,6 +22,7 @@ export default function CreateServicePage() {
   const { currentUser } = useAuth();
   const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const [formPrice, setFormPrice] = useState(0);
   const [questions, setQuestions] = useState<FormQuestion[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -100,68 +101,72 @@ export default function CreateServicePage() {
     try {
       let res;
       
-      // If in edit mode, use PUT to update
-      if (editMode && existingFormId) {
-        res = await axios.put(
-          `${APP_URL}/api/forms/${existingFormId}`,
-          { 
-            title: formTitle,
-            description: formDescription,
-            questions,
-          },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setLoading(false);
-        alert('Service form updated successfully!');
-        // Reset form state and redirect
-        setEditMode(false);
-        setExistingFormId(null);
-        setFormTitle('');
-        setFormDescription('');
-        setQuestions([]);
-        router.push('/services');
-      } else if (formType === 'service') {
-        // Service form - POST to /api/forms/service (admin only)
-        if (!selectedService || !selectedSubservice) {
-          setError('Please select a service and subservice.');
-          setLoading(false);
-          return;
-        }
-        
-        // Use current user's ID as admin when they are admin
-        const serviceAdminUserId = currentUser?.id;
-        
-        res = await axios.post(
-          `${APP_URL}/api/forms/service`,
-          { 
-            title: formTitle,
-            description: formDescription,
-            questions,
-            service_name: selectedService.slug,
-            subservice_name: selectedSubservice.name,
-            admin_user_id: serviceAdminUserId
-          },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setLoading(false);
-        alert('Service form created successfully!');
-        router.push('/services');
-      } else {
-        // General form - POST to /api/forms
-        res = await axios.post(
-          `${APP_URL}/api/forms`,
-          { 
-            title: formTitle,
-            description: formDescription,
-            questions,
-            form_type: 'general'
-          },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setLoading(false);
-        alert('General form created successfully!');
-        router.push('/profile');
-      }
+       // If in edit mode, use PUT to update
+       if (editMode && existingFormId) {
+         res = await axios.put(
+           `${APP_URL}/api/forms/${existingFormId}`,
+           { 
+             title: formTitle,
+             description: formDescription,
+             questions,
+             form_price: formPrice
+           },
+           { headers: { Authorization: `Bearer ${token}` } }
+         );
+         setLoading(false);
+         alert('Service form updated successfully!');
+         // Reset form state and redirect
+         setEditMode(false);
+         setExistingFormId(null);
+         setFormTitle('');
+         setFormDescription('');
+         setFormPrice(0);
+         setQuestions([]);
+         router.push('/services');
+        } else if (formType === 'service') {
+          // Service form - POST to /api/forms/service (admin only)
+          if (!selectedService || !selectedSubservice) {
+            setError('Please select a service and subservice.');
+            setLoading(false);
+            return;
+          }
+          
+          // Use current user's ID as admin when they are admin
+          const serviceAdminUserId = currentUser?.id;
+          
+          res = await axios.post(
+            `${APP_URL}/api/forms/service`,
+            { 
+              title: formTitle,
+              description: formDescription,
+              questions,
+              form_price: formPrice,
+              service_name: selectedService.slug,
+              subservice_name: selectedSubservice.name,
+              admin_user_id: serviceAdminUserId
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+         setLoading(false);
+         alert('Service form created successfully!');
+         router.push('/services');
+        } else {
+          // General form - POST to /api/forms
+          res = await axios.post(
+            `${APP_URL}/api/forms`,
+            { 
+              title: formTitle,
+              description: formDescription,
+              questions,
+              form_price: formPrice,
+              form_type: 'general'
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+         setLoading(false);
+         alert('General form created successfully!');
+         router.push('/profile');
+       }
     } catch (err: any) {
       console.error('Error saving service:', err);
       setError(err.response?.data?.error || 'Failed to save service.');
@@ -271,6 +276,7 @@ export default function CreateServicePage() {
           setFormTitle={setFormTitle}
           setFormDescription={setFormDescription}
           setQuestions={setQuestions}
+          setFormPrice={setFormPrice}
           setFormType={setFormType}
           setEditMode={setEditMode}
           setLoading={setLoading}
@@ -282,19 +288,33 @@ export default function CreateServicePage() {
       <form onSubmit={handleSubmit} className="bg-gray-900 p-2 mb-2">
         
         <div className="mb-2">
-          <label htmlFor="formTitle" className="block text-gray-300 font-bold mb-2">
-            Form Title {formType === 'general' ? '(Required)' : '(Optional - defaults to subservice name)'}:
-          </label>
-          <input
-            type="text"
-            id="formTitle"
-            value={formTitle}
-            onChange={(e) => setFormTitle(e.target.value)}
-            className="border p-2 w-full rounded-md text-gray-300"
-            required={formType === 'general'}
-            placeholder={formType === 'service' ? `${selectedSubservice?.name || 'Service'} Form` : 'Enter form title...'}
-          />
-        </div>
+           <label htmlFor="formPrice" className="block text-gray-300 font-bold mb-2">
+             Form Price (₹):
+           </label>
+           <input
+             type="number"
+             id="formPrice"
+             value={formPrice}
+             onChange={(e) => setFormPrice(parseInt(e.target.value) || 0)}
+             className="border p-2 w-full rounded-md text-gray-300"
+             min="0"
+           />
+         </div>
+         
+         <div className="mb-2">
+           <label htmlFor="formTitle" className="block text-gray-300 font-bold mb-2">
+             Form Title {formType === 'general' ? '(Required)' : '(Optional - defaults to subservice name)'}:
+           </label>
+           <input
+             type="text"
+             id="formTitle"
+             value={formTitle}
+             onChange={(e) => setFormTitle(e.target.value)}
+             className="border p-2 w-full rounded-md text-gray-300"
+             required={formType === 'general'}
+             placeholder={formType === 'service' ? `${selectedSubservice?.name || 'Service'} Form` : 'Enter form title...'}
+           />
+         </div>
 
         <div className="mb-2">
           <label htmlFor="formDescription" className="block text-gray-300 font-bold mb-2">Description (Optional):</label>

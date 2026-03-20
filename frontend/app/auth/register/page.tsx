@@ -4,8 +4,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL
+import { APP_URL } from '@/lib/config';
 
 export default function Register() {
   const [username, setUsername] = useState('');

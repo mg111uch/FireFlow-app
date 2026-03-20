@@ -90,31 +90,34 @@ export default function FillFormPage({ params }: { params: Promise<{ formId: str
       return;
     }
 
-    // If form has a price > 0, show payment modal first
-    if (form && (form.price || 0) > 0) {
-      setShowPayment(true);
-      setSubmitting(false);
-      return;
-    }
+     // If form has a price > 0, show payment modal first
+     if (form && (form.form_price || 0) > 0) {
+       setShowPayment(true);
+       setSubmitting(false);
+       return;
+     }
 
     // Otherwise, submit directly
     await submitForm();
   };
 
-  const submitForm = async () => {
-    try {
-      await axios.post(`${APP_URL}/api/forms/${formId}/submit`, { answers }, {
-        headers: currentUser ? { Authorization: `Bearer ${localStorage.getItem('token')}` } : {}
-      });
-      alert('Form submitted successfully!');
-      router.push(returnUrl);
-    } catch (err: any) {
-      console.error('Error submitting form:', err);
-      setError(err.response?.data?.error || 'Failed to submit form.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+   const submitForm = async () => {
+     try {
+       await axios.post(`${APP_URL}/api/forms/${formId}/submit`, { 
+         answers,
+         form_price: form?.form_price || 0
+       }, {
+         headers: currentUser ? { Authorization: `Bearer ${localStorage.getItem('token')}` } : {}
+       });
+       alert('Form submitted successfully!');
+       router.push(returnUrl);
+     } catch (err: any) {
+       console.error('Error submitting form:', err);
+       setError(err.response?.data?.error || 'Failed to submit form.');
+     } finally {
+       setSubmitting(false);
+     }
+   };
 
   const handlePaymentSuccess = async (paymentDetails: any) => {
     setShowPayment(false);
@@ -159,8 +162,9 @@ export default function FillFormPage({ params }: { params: Promise<{ formId: str
       <h1 className="text-2xl font-bold mb-2 pl-2 pr-2">{form.title}</h1>
       <p className="text-gray-400 mb-2 pl-2">{form.description}</p>
       <p className="text-sm text-gray-500 mb-4  pl-2">Created by: {form.creator_username}</p>
+      <p className="text-sm text-gray-500 mb-4 pl-2">Form Price: ₹ {form.form_price || 0}</p>
 
-      {error && <p className="text-red-500 mb-4">{error}</p>}
+       {error && <p className="text-red-500 mb-4">{error}</p>}
 
       <form onSubmit={handleSubmit} className="bg-gray-800 pt-3">
         {form.questions?.map((q) => (
@@ -210,19 +214,19 @@ export default function FillFormPage({ params }: { params: Promise<{ formId: str
             className="bg-blue-500 text-white px-6 py-2 rounded-md text-lg font-bold"
             disabled={submitting}
           >
-            {submitting ? 'Submitting...' : ((form?.price || 0) > 0 ? `Pay ₹${form?.price} & Submit` : 'Submit')}
+             {submitting ? 'Submitting...' : ((form?.form_price || 0) > 0 ? `Pay ₹ ${form?.form_price} & Submit` : 'Submit')}
           </button>
         </div>
       </form>
 
       {/* Payment Modal */}
-      <GPayPaymentModal
-        isOpen={showPayment}
-        onClose={() => setShowPayment(false)}
-        amount={form?.price || 0}
-        onPaymentSuccess={handlePaymentSuccess}
-        onPaymentFailure={handlePaymentFailure}
-      />
+       <GPayPaymentModal
+         isOpen={showPayment}
+         onClose={() => setShowPayment(false)}
+         amount={form?.form_price || 0}
+         onPaymentSuccess={handlePaymentSuccess}
+         onPaymentFailure={handlePaymentFailure}
+       />
     </div>
   );
 }

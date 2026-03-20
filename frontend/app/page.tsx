@@ -13,8 +13,7 @@ import Tabs from '../components/ui/Tabs';
 import MarketCard from '@/components/MarketCard';
 import FormCard from '@/components/FormCard';
 import { jwtDecode } from 'jwt-decode';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL
+import { API_URL } from '@/lib/config';
 
 export default function Home() {
   const { currentUser, isAuthenticated, loading: authLoading, token, logout } = useAuth();
@@ -110,7 +109,7 @@ export default function Home() {
 
   const fetchStats = async () => {
     try {
-      const res = await axios.get(`${APP_URL}/api/stats`);
+      const res = await axios.get(`${API_URL}/api/stats`);
       setStats(res.data);
     } catch (err) {
       console.error('Error fetching stats:', err);
@@ -122,7 +121,7 @@ export default function Home() {
     setMarketsError(null);
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await axios.get(`${APP_URL}/api/markets`, { headers });
+      const res = await axios.get(`${API_URL}/api/markets`, { headers });
       setMarkets(res.data);
     } catch (err: any) {
       console.error('Error fetching markets:', err);
@@ -161,7 +160,7 @@ export default function Home() {
     setFormsLoading(true);
     setFormsError(null);
     try {
-      const res = await axios.get(`${APP_URL}/api/forms/all`);
+      const res = await axios.get(`${API_URL}/api/forms/all`);
       setForms(res.data);
     } catch (err: any) {
       console.error('Error fetching forms:', err);
@@ -188,7 +187,7 @@ export default function Home() {
   }
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto max-w-2xl">
       {currentUser && 
       <div className="flex justify-between items-center mb-2 ml-2 mr-2">
         <h2 className="text-4xm font-semibold text-gray-100">

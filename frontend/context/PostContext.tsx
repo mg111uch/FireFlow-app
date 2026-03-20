@@ -4,8 +4,7 @@ import React, { createContext, useState, useContext, useEffect, useCallback } fr
 import axios from 'axios';
 import { Post } from '@/lib/types';
 import { useAuth } from './AuthContext'; 
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 interface PostContextType {
   posts: Post[];
@@ -40,7 +39,7 @@ export const PostProvider = ({ children }: { children: React.ReactNode }) => {
     const currentPage = initial ? 1 : page;
 
     try {
-      const response = await axios.get(`${APP_URL}/api/posts?page=${currentPage}&limit=10`, {
+      const response = await axios.get(`${API_URL}/api/posts?page=${currentPage}&limit=10`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (response.data.length === 0) {
@@ -66,7 +65,7 @@ export const PostProvider = ({ children }: { children: React.ReactNode }) => {
     if (!token) return;
     setLoading(true);
     try {
-      const response = await axios.get(`${APP_URL}/api/posts/${id}`, {
+      const response = await axios.get(`${API_URL}/api/posts/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const fetchedPost = response.data;

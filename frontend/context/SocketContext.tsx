@@ -3,8 +3,7 @@ import React, { createContext, useContext, useRef, useEffect, ReactNode } from '
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL
+import { API_URL } from '@/lib/config';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -28,10 +27,10 @@ export const SocketProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       return; // Do not proceed without token or while auth is loading
     }
 
-    console.log('Connecting to WebSocket at:', APP_URL);
+    console.log('Connecting to WebSocket at:', API_URL);
     // Connect to the WebSocket server with authentication
     if (!socketRef.current) {
-      socketRef.current = io(APP_URL as string, {
+      socketRef.current = io(API_URL, {
             auth: {
               token: token, // Pass the JWT token for authentication
             },

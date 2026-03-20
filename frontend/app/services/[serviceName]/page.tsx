@@ -1,9 +1,13 @@
 'use client';
 
-import React, { use } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { getServiceBySlug, Service } from '@/lib/services-data';
+import { useRazorpayPayment } from '@/hooks/useRazorpayPayment';
+
+const SUBSCRIPTION_AMOUNT = 11; 
 
 interface ServicePageProps {
   params: Promise<{
@@ -16,17 +20,48 @@ export default function ServicePage({ params }: ServicePageProps) {
   // Unwrap params using React.use() for Next.js 15+ compatibility
   const { serviceName } = use(params);
   const service = getServiceBySlug(serviceName);
+  const searchParams = useSearchParams();
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+ 
+  const { initiatePayment, isLoading, error } = useRazorpayPayment();
 
-  if (!service) {
-    return (
-      <div className="container mx-auto p-2">
-        <Link href="/services" className="mb-4 px-4 py-2 bg-gray-600 rounded-md inline-block hover:bg-gray-300">
-          Go Back to Services
-        </Link>
-        <h1 className="text-center text-xl font-bold">Service not found</h1>
-      </div>
-    );
-  }
+  // Show success toast when redirected back from /payment/callback
+  useEffect(() => {
+    if (searchParams.get('payment') === 'success') {
+      setToast({ type: 'success', message: 'Payment successful! Your subscription is now active.' });
+      // Remove query param from URL without reloading
+      window.history.replaceState({}, '', '/services');
+    }
+  }, [searchParams]);
+ 
+  // Show error toast if hook reports an error
+  useEffect(() => {
+    if (error) {
+      setToast({ type: 'error', message: error });
+    }
+  }, [error]);
+ 
+  // Auto-dismiss toast after 4 seconds
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+ 
+  const handleSubscribe = () => {
+    initiatePayment({
+      amount: SUBSCRIPTION_AMOUNT,
+      description: 'PostShare Subscription',
+      onSuccess: (paymentId) => {
+        // This fires on desktop flow (non-redirect)
+        setToast({ type: 'success', message: `Payment successful! ID: ${paymentId}` });
+      },
+      onFailure: (errMessage) => {
+        setToast({ type: 'error', message: errMessage });
+      },
+    });
+  };
 
   const handleSubserviceClick = (subservice: Service['subservices'][0]) => {
     // Navigate to the subservice page using the subservice name
@@ -34,8 +69,27 @@ export default function ServicePage({ params }: ServicePageProps) {
     router.push(`/services/${serviceName}/${slugName}`);
   };
 
+
+  if (!service) {
+    return (
+      <div className="container mx-auto p-2">
+        <h1 className="text-center text-xl font-bold">Service not found</h1>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-2">
+
+      {/* Toast notification */}
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-lg shadow-lg text-sm font-medium text-white transition-all
+            ${toast.type === 'success' ? 'bg-green-600' : 'bg-red-600'}`}
+        >
+          {toast.message}
+        </div>
+      )}
 
       <h1 className="text-center text-xl font-bold mb-4">{service.name}</h1>
 
@@ -59,6 +113,21 @@ export default function ServicePage({ params }: ServicePageProps) {
           ))}
         </div>
       )}
+
+      {/* Subscribe CTA */}
+      <div className="mt-6 flex flex-col items-center gap-3">
+        <button
+          onClick={handleSubscribe}
+          disabled={isLoading}
+          className="bg-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-indigo-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {isLoading ? 'Opening payment...' : `Subscribe — ₹${SUBSCRIPTION_AMOUNT}`}
+        </button>
+        <p className="text-xs text-gray-500">
+          Secure UPI payment via Razorpay · No card required
+        </p>
+      </div>
+      
     </div>
   );
 }

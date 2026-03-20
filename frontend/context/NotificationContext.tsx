@@ -5,8 +5,7 @@ import axios from 'axios';
 import { useAuth } from './AuthContext';
 import { useSocket } from './SocketContext';
 import { Notification } from '@/lib/types';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -28,7 +27,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const fetchUnreadCount = useCallback(async () => {
     if (!token) return;
     try {
-      const response = await axios.get(`${APP_URL}/api/notifications/unread-count`, {
+      const response = await axios.get(`${API_URL}/api/notifications/unread-count`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUnreadCount(response.data.count);
@@ -41,7 +40,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       if (!token) return;
       setLoading(true);
       try {
-          const response = await axios.get(`${APP_URL}/api/notifications`, {
+          const response = await axios.get(`${API_URL}/api/notifications`, {
               headers: { Authorization: `Bearer ${token}` },
           });
           setNotifications(response.data);
@@ -57,7 +56,7 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const markAllAsRead = useCallback(async () => {
     if (!token || unreadCount === 0) return;
     try {
-      await axios.post(`${APP_URL}/api/notifications/mark-all-read`, {}, {
+      await axios.post(`${API_URL}/api/notifications/mark-all-read`, {}, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUnreadCount(0);

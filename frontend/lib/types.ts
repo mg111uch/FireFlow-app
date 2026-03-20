@@ -110,18 +110,18 @@ export interface FormQuestion {
 }
 
 export interface Form {
-  id: number;
-  title: string;
-  description?: string;
-  creator_id: number;
-  creator_username?: string;
-  created_at: string;
-  form_type?: 'general' | 'service';
-  service_name?: string;
-  subservice_name?: string;
-  price?: number; // Optional price for paid forms (default 0 = free)
-  questions?: FormQuestion[]; // Populated when fetching full form details
-}
+   id: number;
+   title: string;
+   description?: string;
+   creator_id: number;
+   creator_username?: string;
+   created_at: string;
+   form_type?: 'general' | 'service';
+   service_name?: string;
+   subservice_name?: string;
+   form_price?: number; // Optional price for paid forms (default 0 = free)
+   questions?: FormQuestion[]; // Populated when fetching full form details
+ }
 
 export interface FormSubmission {
   id: number;

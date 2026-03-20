@@ -134,9 +134,11 @@ export function GPayPaymentModal({ isOpen, onClose, amount, onPaymentSuccess, on
               'Google Pay is restricted in this preview environment. Please use the simulator below.'
             ) : (
               <>
-                Complete your payment of 
-                <RupeeIcon/>
-                {(amount || 0).toFixed(2)}
+                <span className="flex items-center justify-center gap-1">
+                  Amount
+                  <RupeeIcon/>
+                  {(amount || 0).toFixed(2)}
+                </span>
               </>
             )}
           </AlertDialogDescription>
@@ -149,7 +151,7 @@ export function GPayPaymentModal({ isOpen, onClose, amount, onPaymentSuccess, on
                 <p className="text-sm font-medium">Finalizing your request...</p>
              </div>
           ) : (
-            <div className="p-4 border border-dashed rounded-md bg-gray-50 w-full text-center space-y-4">
+            <div className="p-4 border rounded-md bg-gray-600 w-full text-center space-y-4">
                 {!isProcessing ? (
                   <>
                     <div className="flex flex-col items-center justify-center gap-4">
@@ -169,7 +171,7 @@ export function GPayPaymentModal({ isOpen, onClose, amount, onPaymentSuccess, on
                           }
                         }}
                         existingPaymentMethodRequired={false}
-                        buttonColor="black"
+                        buttonColor="white"
                         buttonType="pay"
                         className="w-full max-w-[240px]"
                       />
@@ -186,9 +188,11 @@ export function GPayPaymentModal({ isOpen, onClose, amount, onPaymentSuccess, on
                       <Button 
                         variant="outline" 
                         onClick={handleMockPayment} 
-                        className="w-full max-w-[240px]"
+                        className="w-full max-w-[240px] text-gray-800"
                       >
-                        <CreditCardIcon /> Mock UPI / Pay Later
+                        <span className="flex items-center gap-2">
+                          <CreditCardIcon /> Mock UPI / Pay Later
+                        </span>
                       </Button>
                     </div>
 
@@ -210,7 +214,7 @@ export function GPayPaymentModal({ isOpen, onClose, amount, onPaymentSuccess, on
         </div>
 
         <div className="flex justify-center">
-            <AlertDialogCancel disabled={isProcessing || isSuccess} className="w-full sm:w-auto">
+            <AlertDialogCancel disabled={isProcessing || isSuccess} onClick={() => onClose()} className="w-full sm:w-auto">
                 Cancel
             </AlertDialogCancel>
         </div>

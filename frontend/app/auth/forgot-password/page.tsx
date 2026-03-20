@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { APP_URL } from '@/lib/config';
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState('');

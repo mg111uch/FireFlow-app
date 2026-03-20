@@ -9,8 +9,7 @@ import axios from 'axios';
 import { OptionsIcon, ViewsIcon, CommentsIcon, UpvoteIcon, DownvoteIcon, RepostIcon, QuoteIcon} from '../lib/icons';
 import OptionsDrawer, { DrawerButton } from './ui/OptionsDrawer';
 import Snackbar from './ui/Snackbar';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 interface PostCardProps {
   post: Post;
@@ -42,7 +41,7 @@ export default function PostCard({ post, onPostUpdate, onDeleteSuccess, currentU
     const token = localStorage.getItem('token');
     if (token && post.id) {
       axios.post(
-        `${APP_URL}/api/posts/${post.id}/view`,
+        `${API_URL}/api/posts/${post.id}/view`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       ).then(response => {
@@ -97,7 +96,7 @@ export default function PostCard({ post, onPostUpdate, onDeleteSuccess, currentU
       setCurrentDownvotes(newDownvotes);
 
       await axios.post(
-        `${APP_URL}/api/posts/${postId}/vote`,
+        `${API_URL}/api/posts/${postId}/vote`,
         { vote_type: voteType },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -131,7 +130,7 @@ export default function PostCard({ post, onPostUpdate, onDeleteSuccess, currentU
       setIsSaved(newSavedState);
 
       const response = await axios.post(
-        `${APP_URL}/api/posts/${postId}/save`,
+        `${API_URL}/api/posts/${postId}/save`,
         {}, // No body needed
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -165,7 +164,7 @@ export default function PostCard({ post, onPostUpdate, onDeleteSuccess, currentU
       setCurrentRepostCount(currentRepostCount + 1);
 
       await axios.post(
-        `${APP_URL}/api/posts/${postId}/repost`,
+        `${API_URL}/api/posts/${postId}/repost`,
         { current_user_id: currentUserId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -198,7 +197,7 @@ export default function PostCard({ post, onPostUpdate, onDeleteSuccess, currentU
       setCurrentRepostCount(currentRepostCount + 1);
 
       await axios.post(
-        `${APP_URL}/api/posts/${postId}/repost`,
+        `${API_URL}/api/posts/${postId}/repost`,
         { quote_content: quoteContent, current_user_id: currentUserId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -226,7 +225,7 @@ export default function PostCard({ post, onPostUpdate, onDeleteSuccess, currentU
     }
 
     try {
-      await axios.delete(`${APP_URL}/api/posts/${postId}`, {
+      await axios.delete(`${API_URL}/api/posts/${postId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       

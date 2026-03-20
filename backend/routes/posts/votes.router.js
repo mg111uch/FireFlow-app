@@ -1,12 +1,26 @@
 const express = require('express');
 const db = require('../../database');
 const { authenticateToken, optionalAuthenticateToken } = require('../../middleware/auth');
+const { authenticateAgentApiKey } = require('../../middleware/agentAuth');
+
+// Combined auth middleware - accepts either JWT or Agent API Key
+const authenticateAny = (req, res, next) => {
+  const agentApiKey = req.headers['x-agent-api-key'];
+  if (agentApiKey) {
+    return authenticateAgentApiKey(req, res, (err) => {
+      if (err) return next(err);
+      req.user = { id: req.agent.userId };
+      next();
+    });
+  }
+  return authenticateToken(req, res, next);
+};
 
 module.exports = (io) => {
   const router = express.Router();
 
   // POST /api/posts/:postId/vote - Vote on a post
-  router.post('/:postId/vote', authenticateToken, (req, res) => {
+  router.post('/:postId/vote', authenticateAny, (req, res) => {
     const { postId } = req.params;
     const { vote_type } = req.body;
     const user_id = req.user.id;
@@ -67,7 +81,7 @@ module.exports = (io) => {
   });
 
   // POST /api/posts/:commentId/vote - Vote on a comment
-  router.post('/:commentId/vote', authenticateToken, (req, res) => {
+  router.post('/:commentId/vote', authenticateAny, (req, res) => {
     const { commentId } = req.params;
     const { vote_type } = req.body; // Expects 1, -1, or 0 to clear vote
     const userId = req.user.id;

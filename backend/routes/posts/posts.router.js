@@ -2,13 +2,30 @@ const express = require('express');
 const db = require('../../database');
 const { getPostQueryFields } = require('../../utils/postQueries');
 const { authenticateToken, optionalAuthenticateToken } = require('../../middleware/auth');
+const { authenticateAgentApiKey, requireWritePermission } = require('../../middleware/agentAuth');
 const upload = require('../../middleware/upload');
+
+// Combined auth middleware - accepts either JWT or Agent API Key
+const authenticateAny = (req, res, next) => {
+  // Check for Agent API Key first
+  const agentApiKey = req.headers['x-agent-api-key'];
+  if (agentApiKey) {
+    return authenticateAgentApiKey(req, res, (err) => {
+      if (err) return next(err);
+      // Convert agent auth to user auth format
+      req.user = { id: req.agent.userId };
+      next();
+    });
+  }
+  // Otherwise use JWT
+  return authenticateToken(req, res, next);
+};
 
 module.exports = (io) => {
   const router = express.Router();
 
   // GET all posts (feed) with pagination
-  router.get('/', authenticateToken, (req, res) => {
+  router.get('/', authenticateAny, (req, res) => {
     const userId = req.user?.id;
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
@@ -35,7 +52,7 @@ module.exports = (io) => {
   });
 
   // Create a new post (community or general)
-  router.post('/', authenticateToken, upload.single('image'), (req, res) => {
+  router.post('/', authenticateAny, requireWritePermission, upload.single('image'), (req, res) => {
     const { title, content, community_id, post_type } = req.body;
     const user_id = req.user.id;
     const image_url = req.file ? `/uploads/${req.file.filename}` : null;

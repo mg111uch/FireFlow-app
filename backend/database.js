@@ -205,24 +205,27 @@ const db = new sqlite3.Database(dbPath, (err) => {
         )
       `);
 // n
-      // Forms table
-      db.run(`
-        CREATE TABLE IF NOT EXISTS forms (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          title TEXT NOT NULL,
-          description TEXT,
-          creator_id INTEGER NOT NULL,
-          form_type TEXT DEFAULT 'general',
-          service_name TEXT,
-          subservice_name TEXT,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
-        )
-      `);
-      // Add columns if they don't exist (for existing databases)
-      db.run(`ALTER TABLE forms ADD COLUMN form_type TEXT DEFAULT 'general'`, (err) => {});
-      db.run(`ALTER TABLE forms ADD COLUMN service_name TEXT`, (err) => {});
-      db.run(`ALTER TABLE forms ADD COLUMN subservice_name TEXT`, (err) => {});
+       // Forms table
+       db.run(`
+         CREATE TABLE IF NOT EXISTS forms (
+           id INTEGER PRIMARY KEY AUTOINCREMENT,
+           title TEXT NOT NULL,
+           description TEXT,
+           form_price INTEGER DEFAULT 0,
+           creator_id INTEGER NOT NULL,
+           form_type TEXT DEFAULT 'general',
+           service_name TEXT,
+           subservice_name TEXT,
+           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+           FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
+         )
+       `);
+       // Add columns if they don't exist (for existing databases)
+       db.run(`ALTER TABLE forms ADD COLUMN form_type TEXT DEFAULT 'general'`, (err) => {});
+       db.run(`ALTER TABLE forms ADD COLUMN service_name TEXT`, (err) => {});
+       db.run(`ALTER TABLE forms ADD COLUMN subservice_name TEXT`, (err) => {});
+       db.run(`ALTER TABLE forms ADD COLUMN form_price INTEGER DEFAULT 0`, (err) => {});
+       db.run(`ALTER TABLE form_submissions ADD COLUMN form_price INTEGER DEFAULT 0`, (err) => {});
 // n
       // Form Questions table
       db.run(`
@@ -246,17 +249,18 @@ const db = new sqlite3.Database(dbPath, (err) => {
         )
       `);
 // n
-      // Form Submissions table
-      db.run(`
-        CREATE TABLE IF NOT EXISTS form_submissions (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          form_id INTEGER NOT NULL,
-          submitter_id INTEGER, -- NULL for anonymous submissions, or user_id
-          submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE,
-          FOREIGN KEY (submitter_id) REFERENCES users(id) ON DELETE SET NULL
-        )
-      `);
+       // Form Submissions table
+       db.run(`
+         CREATE TABLE IF NOT EXISTS form_submissions (
+           id INTEGER PRIMARY KEY AUTOINCREMENT,
+           form_id INTEGER NOT NULL,
+           submitter_id INTEGER, -- NULL for anonymous submissions, or user_id
+           form_price INTEGER DEFAULT 0,
+           submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+           FOREIGN KEY (form_id) REFERENCES forms(id) ON DELETE CASCADE,
+           FOREIGN KEY (submitter_id) REFERENCES users(id) ON DELETE SET NULL
+         )
+       `);
 // n
       // Submission Answers table
       db.run(`
@@ -307,6 +311,50 @@ const db = new sqlite3.Database(dbPath, (err) => {
         )
       `);
 // y
+      // Agent API Keys table
+      db.run(`
+        CREATE TABLE IF NOT EXISTS agent_api_keys (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          key_name TEXT NOT NULL,
+          api_key TEXT NOT NULL UNIQUE,
+          user_id INTEGER NOT NULL,
+          permissions TEXT DEFAULT 'read', -- 'read' or 'read/write'
+          is_active INTEGER DEFAULT 1,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          expires_at TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+      `);
+
+      // ─── Payments table ───────────────────────────────────────────────────
+      // Records every Razorpay payment attempt and its final status.
+      //
+      // Columns:
+      //   razorpay_order_id   — the order created via /api/payments/create-order
+      //   razorpay_payment_id — populated after successful payment + verification
+      //   amount_paise        — amount in paise (e.g. 49900 = ₹499)
+      //   status              — 'created' | 'verified' | 'failed'
+      //   purpose             — free-text label (e.g. 'subscription_fee')
+      //   created_at          — when the order was created
+      //   verified_at         — when signature verification succeeded
+      db.run(`
+        CREATE TABLE IF NOT EXISTS payments (
+          id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id             INTEGER NOT NULL,
+          razorpay_order_id   TEXT NOT NULL UNIQUE,
+          razorpay_payment_id TEXT,
+          amount_paise        INTEGER NOT NULL,
+          currency            TEXT NOT NULL DEFAULT 'INR',
+          status              TEXT NOT NULL DEFAULT 'created',
+          purpose             TEXT NOT NULL DEFAULT 'subscription_fee',
+          created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          verified_at         TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+      `, (err) => {
+        if (err) console.error('Error creating payments table:', err.message);
+        // else console.log('Payments table ready.');
+      });
     });
   }
 });

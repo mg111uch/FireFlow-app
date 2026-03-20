@@ -1,4 +1,3 @@
-// y
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -39,7 +38,22 @@ const upload = multer({
   }
 });
 
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || origin === 'null') return callback(null, true);  // ✅ allow null origin
+    const allowed = [
+      'http://localhost:3000',
+      'http://192.168.50.80:3000',
+      'https://your-domain.com'
+    ];
+    if (allowed.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: origin '${origin}' not allowed`));
+  },
+  credentials: true,          // required — allows Authorization header through
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 app.use(express.json());
 app.use(optionalAuthenticateToken);
 app.use('/api-uploads', express.static(path.join(__dirname, '')));

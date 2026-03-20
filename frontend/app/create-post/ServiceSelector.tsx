@@ -12,6 +12,7 @@ interface ServiceSelectorProps {
   setFormTitle: React.Dispatch<React.SetStateAction<string>>;
   setFormDescription: React.Dispatch<React.SetStateAction<string>>;
   setQuestions: React.Dispatch<React.SetStateAction<any[]>>;
+  setFormPrice: React.Dispatch<React.SetStateAction<number>>;
   setFormType: React.Dispatch<React.SetStateAction<'general' | 'service'>>;
   setEditMode: React.Dispatch<React.SetStateAction<boolean>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -28,6 +29,7 @@ export default function ServiceSelector({
   setFormTitle,
   setFormDescription,
   setQuestions,
+  setFormPrice,
   setFormType,
   setEditMode,
   setLoading,
@@ -48,6 +50,7 @@ export default function ServiceSelector({
       setExistingFormId(form.id);
       setFormTitle(form.title || '');
       setFormDescription(form.description || '');
+      setFormPrice(form.form_price || 0);
       
       // Fetch questions with options
       const questionsRes = await axios.get(`${APP_URL}/api/forms/${form.id}`);
