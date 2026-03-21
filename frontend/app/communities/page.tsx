@@ -1,13 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Community, UserDetails } from '../../lib/types';
-import Link from 'next/link';
+import { UserDetails } from '../../lib/types';
 import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL
 
 export default function Communities() {
   const router = useRouter();

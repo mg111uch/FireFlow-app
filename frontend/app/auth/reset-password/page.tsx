@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import axios from 'axios';
-import { APP_URL } from '@/lib/config';
+import { API_URL } from '@/lib/config';
 
 export default function ResetPasswordPage() {
     const router = useRouter();
@@ -32,7 +32,7 @@ export default function ResetPasswordPage() {
         setMessage('');
 
         try {
-            const res = await axios.post(`${APP_URL}/api/reset-password`, { token, password });
+            const res = await axios.post(`${API_URL}/api/reset-password`, { token, password });
             setMessage(res.data.message + ' Redirecting to login...');
             setTimeout(() => router.push('/login'), 3000);
         } catch (err: any) {

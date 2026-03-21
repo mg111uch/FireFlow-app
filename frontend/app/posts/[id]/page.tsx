@@ -8,8 +8,7 @@ import { Comment } from '@/lib/types';
 import { usePosts } from '@/context/PostContext';
 import PostCard from '@/components/PostCard';
 import CommentCard from '../CommentCard';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 interface CommentWithReplies extends Comment {
   loadedReplies?: CommentWithReplies[];
@@ -77,7 +76,7 @@ export default function PostDetail({ params }: { params: Promise<{ id: string }>
       setLoading(true);
       setError(null);
       try {
-        const response = await axios.get(`${APP_URL}/api/posts/${id}/comments?page=${page}&limit=10`, {
+        const response = await axios.get(`${API_URL}/api/posts/${id}/comments?page=${page}&limit=10`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -117,7 +116,7 @@ export default function PostDetail({ params }: { params: Promise<{ id: string }>
     setLoadingReplies(prev => ({...prev, [parentId]: true}));
 
     try {
-        const response = await axios.get(`${APP_URL}/api/comments/${parentId}/replies?page=${parentComment.repliesPage}&limit=10`, {
+        const response = await axios.get(`${API_URL}/api/comments/${parentId}/replies?page=${parentComment.repliesPage}&limit=10`, {
             headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -203,7 +202,7 @@ export default function PostDetail({ params }: { params: Promise<{ id: string }>
     if (!isAuthenticated || !token || !newComment.trim()) return;
 
     try {
-      await axios.post(`${APP_URL}/api/posts/${id}/comments`, {
+      await axios.post(`${API_URL}/api/posts/${id}/comments`, {
         content: newComment,
         parent_id: replyTo ? replyTo.id : null,
       }, { headers: { Authorization: `Bearer ${token}` } });

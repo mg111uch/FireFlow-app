@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { APP_NAME } from '@/lib/constants';
+import { APP_NAME } from '@/lib/config';
 import { useNotification } from '@/context/NotificationContext';
 import { NotificationIcon, MenuIcon, BackIcon } from '@/lib/icons';
 

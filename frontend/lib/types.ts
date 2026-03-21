@@ -79,6 +79,7 @@ export interface Reaction {
   id: number;
   message_id: number;
   user_id: number;
+  username: string;
   emoji: string;
 }
 

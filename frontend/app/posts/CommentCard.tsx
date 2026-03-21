@@ -8,8 +8,7 @@ import { formatTimeAgo } from '../../lib/utils';
 import { Post, Comment } from '../../lib/types';
 import { useAuth } from '../../context/AuthContext';
 import { UpvoteIcon, DownvoteIcon, SaveIcon, PinIcon } from '../../lib/icons';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 interface CommentWithReplies extends Comment {
   loadedReplies?: CommentWithReplies[];
@@ -45,7 +44,7 @@ export default function CommentCard({ comment, post, onCommentUpdate, onReplyCli
     const newVoteType = comment.user_vote_type === voteType ? null : voteType;
     try {
       await axios.post(
-        `${APP_URL}/api/comments/${comment.id}/vote`,
+        `${API_URL}/api/comments/${comment.id}/vote`,
         { vote_type: newVoteType === null ? 0 : newVoteType },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -59,7 +58,7 @@ export default function CommentCard({ comment, post, onCommentUpdate, onReplyCli
     if (!token) return;
     if (window.confirm('Are you sure you want to delete this comment? This action cannot be undone.')) {
         try {
-            await axios.delete(`${APP_URL}/api/comments/${comment.id}`, {
+            await axios.delete(`${API_URL}/api/comments/${comment.id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             // The websocket event will trigger onCommentDelete in the parent
@@ -76,7 +75,7 @@ export default function CommentCard({ comment, post, onCommentUpdate, onReplyCli
       const newSavedState = !isSaved;
       setIsSaved(newSavedState);
       const response = await axios.post(
-        `${APP_URL}/api/comments/${comment.id}/save`,
+        `${API_URL}/api/comments/${comment.id}/save`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -91,7 +90,7 @@ export default function CommentCard({ comment, post, onCommentUpdate, onReplyCli
   const handlePin = async () => {
       if (!token || currentUser?.id !== post.user_id) return;
       try {
-          await axios.post(`${APP_URL}/api/comments/${comment.id}/pin`, {}, {
+          await axios.post(`${API_URL}/api/comments/${comment.id}/pin`, {}, {
               headers: { Authorization: `Bearer ${token}` }
           });
           // Websocket event will handle the state update

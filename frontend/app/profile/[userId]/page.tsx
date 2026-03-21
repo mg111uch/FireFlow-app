@@ -10,8 +10,7 @@ import ProfileHeader from '../ProfileHeader';
 import Tabs from '../../../components/ui/Tabs';
 import CommunitiesList from '../CommunitiesList';
 import FormCard from '../../../components/FormCard';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 export default function ProfilePage({ params }: { params: Promise<{ userId: string }> }) {
   const router = useRouter();
@@ -50,10 +49,10 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const [userRes, postsRes, communitiesRes, formsRes] = await Promise.all([ //
-        axios.get(`${APP_URL}/api/users/${profileUserId}`, { headers }),
-        axios.get(`${APP_URL}/api/users/${profileUserId}/posts`, { headers }),
-        axios.get(`${APP_URL}/api/users/${profileUserId}/communities`, { headers }),
-        axios.get(`${APP_URL}/api/users/${profileUserId}/forms`, { headers })
+        axios.get(`${API_URL}/api/users/${profileUserId}`, { headers }),
+        axios.get(`${API_URL}/api/users/${profileUserId}/posts`, { headers }),
+        axios.get(`${API_URL}/api/users/${profileUserId}/communities`, { headers }),
+        axios.get(`${API_URL}/api/users/${profileUserId}/forms`, { headers })
       ]);
       setUser(userRes.data);
       setUserPosts(postsRes.data);
@@ -83,11 +82,11 @@ export default function ProfilePage({ params }: { params: Promise<{ userId: stri
 
     try {
       if (isFollowing) {
-        await axios.post(`${APP_URL}/api/users/${userId}/unfollow`, {}, { headers: { Authorization: `Bearer ${token}` } });
+        await axios.post(`${API_URL}/api/users/${userId}/unfollow`, {}, { headers: { Authorization: `Bearer ${token}` } });
         setIsFollowing(false);
         setFollowerCount(prev => prev - 1);
       } else {
-        await axios.post(`${APP_URL}/api/users/${userId}/follow`, {}, { headers: { Authorization: `Bearer ${token}` } });
+        await axios.post(`${API_URL}/api/users/${userId}/follow`, {}, { headers: { Authorization: `Bearer ${token}` } });
         setIsFollowing(true);
         setFollowerCount(prev => prev + 1);
       }

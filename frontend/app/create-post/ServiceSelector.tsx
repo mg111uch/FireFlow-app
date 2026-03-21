@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 import { Service, SubService } from '../../lib/services-data';
+import { API_URL } from '@/lib/config';
 
 interface ServiceSelectorProps {
   selectedService: Service | null;
@@ -40,11 +41,10 @@ export default function ServiceSelector({
   const handleCheckExisting = async () => {
     if (!selectedService || !selectedSubservice) return;
     
-    const APP_URL = process.env.NEXT_PUBLIC_URL;
     setLoading(true);
     try {
       const res = await axios.get(
-        `${APP_URL}/api/forms/service/${selectedService.slug}/${selectedSubservice.name}`
+        `${API_URL}/api/forms/service/${selectedService.slug}/${selectedSubservice.name}`
       );
       const form = res.data;
       setExistingFormId(form.id);
@@ -53,7 +53,7 @@ export default function ServiceSelector({
       setFormPrice(form.form_price || 0);
       
       // Fetch questions with options
-      const questionsRes = await axios.get(`${APP_URL}/api/forms/${form.id}`);
+      const questionsRes = await axios.get(`${API_URL}/api/forms/${form.id}`);
       setQuestions(questionsRes.data.questions || []);
       
       setFormType('service');

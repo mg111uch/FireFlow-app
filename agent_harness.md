@@ -3,11 +3,7 @@
 
 ## TASK
 
-Find why loading callback page `React/reddit-clone/frontend/app/payment/callback/page.tsx` after successful payment gives Type error: Invalid URL {
-  code: 'ERR_INVALID_URL',
-  input: 'null',
-  page: '/payment/callback'
-}. Locate where is input `null` coming from. Find the bug.
+What is the error at line 299 in `React/reddit-clone/frontend/app/chats/[userId]/page.tsx`.
 Do not give code, just a concise plan or answer.
 
 

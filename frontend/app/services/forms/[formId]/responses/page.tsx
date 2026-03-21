@@ -6,8 +6,7 @@ import axios from 'axios';
 import { Form, FormSubmission } from '../../../../../lib/types';
 import ResponsesCard from '@/app/services/ResponsesCard';
 import { jwtDecode } from 'jwt-decode';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 export default function FormResponsesPage({ params }: { params: Promise<{ formId: string }> }) {
   const router = useRouter();
@@ -27,7 +26,7 @@ export default function FormResponsesPage({ params }: { params: Promise<{ formId
     // Check if user is creator
     try {
       const decoded: any = jwtDecode(token);
-      axios.get(`${APP_URL}/api/forms/${formId}`, { headers: { Authorization: `Bearer ${token}` } })
+      axios.get(`${API_URL}/api/forms/${formId}`, { headers: { Authorization: `Bearer ${token}` } })
         .then(res => {
           if (res.data.creator_id !== decoded.id) {
             alert('You are not authorized to view responses for this form.');
@@ -50,7 +49,7 @@ export default function FormResponsesPage({ params }: { params: Promise<{ formId
     const fetchSubmissions = async (token: string) => {
       setLoading(true);
       try {
-        const res = await axios.get(`${APP_URL}/api/forms/${formId}/submissions`, {
+        const res = await axios.get(`${API_URL}/api/forms/${formId}/submissions`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSubmissions(res.data);

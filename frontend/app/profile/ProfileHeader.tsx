@@ -6,8 +6,7 @@ import Link from 'next/link';
 import { UserDetails } from '../../lib/types';
 import { formatMemberSince, getInitials } from '../../lib/utils';
 import { MailIcon } from '../../lib/icons';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 interface ProfileHeaderProps {
   user: UserDetails;
@@ -35,7 +34,7 @@ export default function ProfileHeader({
         <div className="relative inline-flex items-center justify-center w-10 h-10 overflow-hidden bg-gray-300 rounded-full">
           {user.profile_img_url ? (
             <img 
-              src={`${APP_URL}/api-uploads${user.profile_img_url}`} 
+              src={`${API_URL}/api-uploads${user.profile_img_url}`} 
               alt={user.username} 
               className="w-full h-full object-cover" 
             />

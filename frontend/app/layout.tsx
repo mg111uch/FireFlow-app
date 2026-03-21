@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import TopAppBar from '../components/TopAppBar';
 import BottomAppBar from '../components/BottomAppBar';
-import { APP_NAME } from '@/lib/constants';
+import { APP_NAME } from '@/lib/config';
 import { AuthProvider } from '@/context/AuthContext';
 import { SocketProvider } from '@/context/SocketContext';
 import { PostProvider } from '@/context/PostContext';

@@ -6,8 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import { Post, Community } from '../../../lib/types';
 import PostCard from '../../../components/PostCard';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 export default function CommunityPage({ params }: { params: Promise<{ communityId: string }> }) {
   const { communityId } = use(params);
@@ -30,8 +29,8 @@ export default function CommunityPage({ params }: { params: Promise<{ communityI
     setLoading(true);
     try {
       const [communityRes, postsRes] = await Promise.all([
-        axios.get(`${APP_URL}/api/communities/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get(`${APP_URL}/api/communities/${id}/posts`, { headers: { Authorization: `Bearer ${token}` } })
+        axios.get(`${API_URL}/api/communities/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${API_URL}/api/communities/${id}/posts`, { headers: { Authorization: `Bearer ${token}` } })
       ]);
       setCommunity(communityRes.data);
       setPosts(postsRes.data);

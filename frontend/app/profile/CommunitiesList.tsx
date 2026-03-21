@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import { Community } from '../../lib/types';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 interface CommunitiesListProps {
   communities?: Community[];
@@ -44,7 +43,7 @@ export default function CommunitiesList({
   const handleJoin = async (communityId: number) => {
     if (!token) return;
     try {
-      const res = await axios.post(`${APP_URL}/api/communities/${communityId}/join`,
+      const res = await axios.post(`${API_URL}/api/communities/${communityId}/join`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -63,7 +62,7 @@ export default function CommunitiesList({
   const handleUnJoin = async (communityId: number) => {
     if (!token) return;
     try {
-      const res = await axios.post(`${APP_URL}/api/communities/${communityId}/unjoin`,
+      const res = await axios.post(`${API_URL}/api/communities/${communityId}/unjoin`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -82,7 +81,7 @@ export default function CommunitiesList({
     if (!token) return;
     if (window.confirm(`Are you sure you want to delete the community "${communityName}"? This action cannot be undone and all posts within it will be deleted.`)) {
       try {
-        await axios.delete(`${APP_URL}/api/communities/${communityId}`, {
+        await axios.delete(`${API_URL}/api/communities/${communityId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         alert('Community deleted successfully!');
@@ -102,7 +101,7 @@ export default function CommunitiesList({
     
     setIsCreating(true);
     try {
-      const res = await axios.post(`${APP_URL}/api/communities`,
+      const res = await axios.post(`${API_URL}/api/communities`,
         { name: newCommunityName, description: newCommunityDescription },
         { headers: { Authorization: `Bearer ${token}` } }
       );

@@ -10,8 +10,7 @@ import Tabs from '@/components/ui/Tabs';
 import ServiceSelector from './ServiceSelector';
 import QuestionEditor from './QuestionEditor';
 import FormPreview from './FormPreview';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 // Define admin user IDs who can create service forms
 const ADMIN_USER_IDS = [1]; // Add admin user IDs here
@@ -104,7 +103,7 @@ export default function CreateServicePage() {
        // If in edit mode, use PUT to update
        if (editMode && existingFormId) {
          res = await axios.put(
-           `${APP_URL}/api/forms/${existingFormId}`,
+           `${API_URL}/api/forms/${existingFormId}`,
            { 
              title: formTitle,
              description: formDescription,
@@ -135,7 +134,7 @@ export default function CreateServicePage() {
           const serviceAdminUserId = currentUser?.id;
           
           res = await axios.post(
-            `${APP_URL}/api/forms/service`,
+            `${API_URL}/api/forms/service`,
             { 
               title: formTitle,
               description: formDescription,
@@ -153,7 +152,7 @@ export default function CreateServicePage() {
         } else {
           // General form - POST to /api/forms
           res = await axios.post(
-            `${APP_URL}/api/forms`,
+            `${API_URL}/api/forms`,
             { 
               title: formTitle,
               description: formDescription,
@@ -189,7 +188,7 @@ export default function CreateServicePage() {
     if (confirm('Are you sure you want to delete this service form? This action cannot be undone.')) {
       setLoading(true);
       try {
-        await axios.delete(`${APP_URL}/api/forms/${existingFormId}`, {
+        await axios.delete(`${API_URL}/api/forms/${existingFormId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setLoading(false);

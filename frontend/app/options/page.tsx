@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { APP_NAME } from '@/lib/constants';
+import { APP_NAME } from '@/lib/config';
 
 export default function OptionsPage() {
   const router = useRouter();

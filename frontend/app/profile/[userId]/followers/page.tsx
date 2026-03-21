@@ -6,8 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import Tabs from '@/components/ui/Tabs';
 import { getInitials } from '@/lib/utils';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 interface User {
   id: number;
@@ -54,8 +53,8 @@ function FollowersContent({ userId, initialTab }: { userId: string; initialTab: 
       setLoading(true);
       try {
         const [followersRes, followingRes] = await Promise.all([
-          axios.get(`${APP_URL}/api/users/${userId}/followers`),
-          axios.get(`${APP_URL}/api/users/${userId}/following`),
+          axios.get(`${API_URL}/api/users/${userId}/followers`),
+          axios.get(`${API_URL}/api/users/${userId}/following`),
         ]);
         setFollowers(followersRes.data);
         setFollowing(followingRes.data);

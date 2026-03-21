@@ -7,8 +7,7 @@ import { Community } from '../../lib/types';
 import Tabs from '../../components/ui/Tabs';
 import CreateMarketForm from './CreateMarketForm';
 import CreateServicePage from './CreateServicePage';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 export default function CreatePostPage() {
   const [postType, setPostType] = useState<'community' | 'general'>('general');
@@ -52,7 +51,7 @@ export default function CreatePostPage() {
 
   const fetchCommunities = async (token: string) => {
     try {
-      const res = await axios.get(`${APP_URL}/api/communities`, {
+      const res = await axios.get(`${API_URL}/api/communities`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCommunities(res.data);
@@ -89,7 +88,7 @@ export default function CreatePostPage() {
     }
     
     try {
-      await axios.post(`${APP_URL}/api/posts`,
+      await axios.post(`${API_URL}/api/posts`,
         formData,
         { headers: { 
           Authorization: `Bearer ${token}` ,

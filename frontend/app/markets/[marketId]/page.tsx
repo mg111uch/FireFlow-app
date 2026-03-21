@@ -8,8 +8,7 @@ import { formatTimeAgo } from '../../../lib/utils';
 import { io, Socket } from 'socket.io-client';
 import { jwtDecode } from 'jwt-decode';
 import Link from 'next/link';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 export default function MarketDetailPage({ params }: { params: Promise<{ marketId: string }> }) {
   const router = useRouter();
@@ -37,7 +36,7 @@ export default function MarketDetailPage({ params }: { params: Promise<{ marketI
     fetchMarketDetails(token);
 
     // Setup WebSocket connection
-    socketRef.current = io(APP_URL as string, {
+    socketRef.current = io(API_URL, {
       auth: { token: token },
       transports: ['websocket'],
     });
@@ -73,7 +72,7 @@ export default function MarketDetailPage({ params }: { params: Promise<{ marketI
     setLoading(true);
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await axios.get(`${APP_URL}/api/markets/${marketId}`, { headers });
+      const res = await axios.get(`${API_URL}/api/markets/${marketId}`, { headers });
       setMarket(res.data);
     } catch (err: any) {
       console.error('Error fetching market details:', err);
@@ -104,7 +103,7 @@ export default function MarketDetailPage({ params }: { params: Promise<{ marketI
 
     try {
       await axios.post(
-        `${APP_URL}/api/markets/${marketId}/trade`,
+        `${API_URL}/api/markets/${marketId}/trade`,
         { option_id: selectedOptionId, amount: tradeAmount },
         { headers: { Authorization: `Bearer ${token}` } }
       );

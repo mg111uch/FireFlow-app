@@ -9,8 +9,7 @@ import { Message, UserDetails } from '../../lib/types';
 import { formatTimeAgo } from '../../lib/utils';
 
 import { io, Socket } from 'socket.io-client';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 // Extended Message type for conversation list, includes other_user details
 interface Conversation extends Message {
@@ -40,7 +39,7 @@ export default function ChatsPage() {
       setCurrentUser(decoded);
       fetchConversations(token);
 
-      socketRef.current = io(APP_URL as string, {
+      socketRef.current = io(API_URL, {
         auth: { token },
         transports: ['websocket'],
       });
@@ -72,7 +71,7 @@ export default function ChatsPage() {
   const fetchConversations = async (token: string) => {
     setLoading(true);
     try {
-      const res = await axios.get(`${APP_URL}/api/chats`, {
+      const res = await axios.get(`${API_URL}/api/chats`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setConversations(res.data);

@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
 import { io, Socket } from 'socket.io-client';
 import { Message, UserDetails, Reaction } from '../../../lib/types';
+import { SendIcon, ReplyIcon, EmojiPickerIcon, EditIcon, DeleteIcon, CrossIcon, OptionsIcon } from '@/lib/icons';
 import { formatTimeAgo } from '../../../lib/utils';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 export default function ChatRoomPage({ params }: { params: Promise<{ userId: string }> }) {
   const router = useRouter();
@@ -32,7 +32,7 @@ export default function ChatRoomPage({ params }: { params: Promise<{ userId: str
     if (!token || !hasMore) return;
 
     try {
-      const res = await axios.get(`${APP_URL}/api/chats/${otherUserId}/messages?page=${page + 1}`, { 
+      const res = await axios.get(`${API_URL}/api/chats/${otherUserId}/messages?page=${page + 1}`, { 
         headers: { Authorization: `Bearer ${token}` } 
       });
       if (res.data.length > 0) {
@@ -67,6 +67,23 @@ export default function ChatRoomPage({ params }: { params: Promise<{ userId: str
   const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
   const [editingContent, setEditingContent] = useState('');
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const [showOptionsFor, setShowOptionsFor] = useState<number | null>(null);
+  const [justOpened, setJustOpened] = useState(false);
+
+  const toggleOptions = (messageId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setJustOpened(true);
+    setTimeout(() => setJustOpened(false), 100);
+    setShowOptionsFor(showOptionsFor === messageId ? null : messageId);
+  };
+
+  useEffect(() => {
+    if (!showOptionsFor || justOpened) return;
+    
+    const handleClickOutside = () => setShowOptionsFor(null);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showOptionsFor, justOpened]);
 
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessageContent(e.target.value);
@@ -97,7 +114,7 @@ export default function ChatRoomPage({ params }: { params: Promise<{ userId: str
     if (!token) return;
 
     try {
-      await axios.put(`${APP_URL}/api/chats/messages/${messageId}`, 
+      await axios.put(`${API_URL}/api/chats/messages/${messageId}`, 
         { content: editingContent }, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -118,7 +135,7 @@ export default function ChatRoomPage({ params }: { params: Promise<{ userId: str
     if (!token) return;
 
     try {
-      await axios.delete(`${APP_URL}/api/chats/messages/${messageId}`, 
+      await axios.delete(`${API_URL}/api/chats/messages/${messageId}`, 
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setMessages(messages.filter(msg => msg.id !== messageId));
@@ -143,7 +160,7 @@ export default function ChatRoomPage({ params }: { params: Promise<{ userId: str
       return;
     }
 
-    socketRef.current = io(APP_URL as string, {
+    socketRef.current = io(API_URL as string, {
       auth: { token },
       transports: ['websocket'],
     });
@@ -186,8 +203,8 @@ export default function ChatRoomPage({ params }: { params: Promise<{ userId: str
       setLoading(true);
       try {
         const [messagesRes, otherUserRes] = await Promise.all([
-          axios.get(`${APP_URL}/api/chats/${otherUserId}/messages`, { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get(`${APP_URL}/api/users/${otherUserId}`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${API_URL}/api/chats/${otherUserId}/messages`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${API_URL}/api/users/${otherUserId}`, { headers: { Authorization: `Bearer ${token}` } }),
         ]);
         setMessages(messagesRes.data);
         setOtherUser(otherUserRes.data);
@@ -209,9 +226,9 @@ export default function ChatRoomPage({ params }: { params: Promise<{ userId: str
 
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current.scrollIntoView({ behavior: 'auto' });
     }
-  }, [messages]);
+  }, [messages, replyingTo]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
@@ -239,26 +256,23 @@ export default function ChatRoomPage({ params }: { params: Promise<{ userId: str
   if (!otherUser) return <div className="container mx-auto p-4 text-center">User not found.</div>;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] bg-gray-900 rounded-lg">
-      <div className="p-4 bg-gray-700 border-b border-gray-400 flex items-center justify-between">
-        <button onClick={() => router.back()} className="text-blue-400 hover:text-blue-300">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="size-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-          </svg>
-        </button>
+    <div className="flex flex-col h-screen -mt-16 -mb-20 bg-gray-900 rounded-lg">
+      <div className="fixed top-15 left-0 right-0 p-2 bg-gray-700 border-b border-gray-400 flex items-center justify-between z-10"> 
+        <div className="w-6"></div>      
         <h1 className="text-xl font-bold text-white">{otherUser.username}</h1>
         <div className="w-6"></div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className={`flex-1 overflow-y-auto p-4 mt-16 pb-24 ${replyingTo ? 'pb-40' : ''}`}>
         <div ref={loader} />
         {hasMore && <div className="text-center">Loading more messages...</div>}
         {messages.map((message, index) => (
           <div key={message.id}>
             <div
               ref={index === messages.length - 1 ? messagesEndRef : null}
-              className={`group flex items-start gap-2 my-2 ${message.sender_id === currentUser?.id ? 'flex-row-reverse' : 'flex-row'}`}>
-              <div className={`max-w-[70%] p-3 pb-5 rounded-lg shadow-md relative ${
+              className={`group flex items-start gap-2 ${message.sender_id === currentUser?.id ? 'flex-row-reverse' : 'flex-row'}`}
+              style={{ marginBottom: (message.reactions && message.reactions.length > 0) ? '1.0rem' : '0.15rem' }}>
+              <div className={`max-w-[70%] p-2 pb-3 rounded-lg shadow-md relative ${
                   message.sender_id === currentUser?.id ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-200'
               }`}>
                 {(message as any).reply_to_message_id && (message as any).replied_to_content && (
@@ -282,10 +296,12 @@ export default function ChatRoomPage({ params }: { params: Promise<{ userId: str
                   <p className="text-sm break-words">{message.content}</p>
                 )}
 
+                {index === messages.length - 1 && (
                 <div className="flex justify-end items-center mt-1">
                   <span className="text-xs opacity-75 mr-2">{formatTimeAgo(message.created_at)}</span>
                   {message.edited === 1 && <span className="text-xs opacity-75 mr-2">(edited)</span>}
                 </div>
+                )}
                 
                 {/* Reactions Display */}
               {message.reactions && message.reactions.length > 0 && (
@@ -325,34 +341,54 @@ export default function ChatRoomPage({ params }: { params: Promise<{ userId: str
               </div>
 
               {/* Message Options */}
-              <div className="flex gap-1 mt-2 opacity-0 group-hover:opacity-100">
-                  <button onClick={() => setReplyingTo(message)} className="bg-gray-700 rounded-full p-1.5 hover:bg-gray-600">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 text-gray-300">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-                      </svg>
+              <div className="message-options flex gap-1 mt-2 opacity-0 group-hover:opacity-100 relative">
+                  <button 
+                    onClick={(e) => toggleOptions(message.id, e)} 
+                    className="bg-gray-700 rounded-full p-1.5 hover:bg-gray-600"
+                  >
+                      <OptionsIcon className="size-4" />
                   </button>
-                  <button onClick={() => setShowEmojiPickerFor(message.id)} className="bg-gray-700 rounded-full p-1.5 hover:bg-gray-600">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 text-gray-300">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9 9.75h.008v.008H9V9.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm4.125 4.5h.008v.008h-.008v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                      </svg>
-                  </button>
-                  {message.sender_id === currentUser?.id && (
-                      <>
-                          <button onClick={() => {setEditingMessageId(message.id); setEditingContent(message.content)}} className="bg-gray-700 rounded-full p-1.5 hover:bg-gray-600">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 text-gray-300">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                              </svg>
+                  
+                  {showOptionsFor === message.id && (
+                    <div 
+                      onClick={(e) => e.stopPropagation()}
+                      className={`options-dropdown absolute ${message.sender_id === currentUser?.id ? 'right-0' : 'left-0'} top-8 bg-gray-800 rounded-lg shadow-lg py-1 z-20 min-w-[140px] border border-gray-700`}>
+                      <div className="px-4 py-2 text-xs text-gray-400 border-b border-gray-700">
+                        {formatTimeAgo(message.created_at)}
+                      </div>
+                      <button 
+                        onClick={() => { setReplyingTo(message); setShowOptionsFor(null); }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-200 hover:bg-gray-700 flex items-center gap-2"
+                      >
+                        <ReplyIcon className="size-4" /> Reply
+                      </button>
+                      <button 
+                        onClick={() => { setShowEmojiPickerFor(message.id); setShowOptionsFor(null); }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-200 hover:bg-gray-700 flex items-center gap-2"
+                      >
+                        <EmojiPickerIcon className="size-4" /> Emoji
+                      </button>
+                      {message.sender_id === currentUser?.id && (
+                        <>
+                          <button 
+                            onClick={() => { setEditingMessageId(message.id); setEditingContent(message.content); setShowOptionsFor(null); }}
+                            className="w-full px-4 py-2 text-left text-sm text-gray-200 hover:bg-gray-700 flex items-center gap-2"
+                          >
+                            <EditIcon className="size-4" /> Edit
                           </button>
-                          <button onClick={() => handleDeleteMessage(message.id)} className="bg-gray-700 rounded-full p-1.5 hover:bg-gray-600">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4 text-gray-300">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.124-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.077-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                              </svg>
+                          <button 
+                            onClick={() => { handleDeleteMessage(message.id); setShowOptionsFor(null); }}
+                            className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-gray-700 flex items-center gap-2"
+                          >
+                            <DeleteIcon className="size-4" /> Delete
                           </button>
-                      </>
+                        </>
+                      )}
+                    </div>
                   )}
               </div>
             </div>
-            {message.id === lastSeenMessageId && (
+            {index === messages.length - 1 && message.id === lastSeenMessageId && (
               <div className="text-right text-xs text-gray-400 mt-1 pr-2">
                 Seen {formatTimeAgo(message.created_at)}
               </div>
@@ -362,16 +398,14 @@ export default function ChatRoomPage({ params }: { params: Promise<{ userId: str
       </div>
 
       {replyingTo && (
-        <div className="p-4 bg-gray-800 border-t border-gray-700">
+        <div className="absolute bottom-16 left-0 right-0 p-4 bg-gray-800 border-t border-gray-700 z-10">
           <div className="bg-gray-700 p-2 rounded-lg">
             <div className="flex justify-between items-center">
               <p className="text-sm text-gray-400">
                 Replying to <span className="font-bold">{replyingTo.sender_id === currentUser?.id ? "yourself" : otherUser?.username}</span>
               </p>
               <button onClick={() => setReplyingTo(null)} className="text-gray-400 hover:text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="size-4">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <CrossIcon/>
               </button>
             </div>
             <p className="text-sm text-gray-300 truncate">{replyingTo.content}</p>
@@ -381,16 +415,16 @@ export default function ChatRoomPage({ params }: { params: Promise<{ userId: str
 
       {isOtherUserTyping && <div className="p-2 text-center text-gray-400 text-sm">{otherUser.username} is typing...</div>}
 
-      <form onSubmit={handleSendMessage} className="p-4 bg-gray-800 border-t border-gray-700 flex">
+      <form onSubmit={handleSendMessage} className="fixed bottom-0 left-0 right-0 p-2 bg-gray-800 border-t border-gray-700 flex z-10">
         <input
           type="text"
           value={newMessageContent}
           onChange={handleTyping}
           placeholder="Type a message..."
-          className="flex-1 p-3 rounded-l-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
+          className="flex-1 p-2 rounded-l-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500"
         />
         <button type="submit" className="bg-blue-600 text-white px-6 py-3 rounded-r-lg hover:bg-blue-700 focus:outline-none">
-          Send
+          <SendIcon/>
         </button>
       </form>
     </div>

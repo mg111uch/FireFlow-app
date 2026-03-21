@@ -5,8 +5,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
 import { Community } from '../../../lib/types';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 export default function EditCommunityPage({ params }: { params: Promise<{ communityId: string }> }) {
   const { communityId } = use(params);
@@ -31,7 +30,7 @@ export default function EditCommunityPage({ params }: { params: Promise<{ commun
         const decodedToken: any = jwtDecode(token);
         const userId = decodedToken.id;
 
-        const response = await axios.get(`${APP_URL}/api/communities/${communityId}`, {
+        const response = await axios.get(`${API_URL}/api/communities/${communityId}`, {
           headers: {Authorization: `Bearer ${token}`},
         });
         const fetchedCommunity: Community = response.data;
@@ -81,7 +80,7 @@ export default function EditCommunityPage({ params }: { params: Promise<{ commun
     }
 
     try {
-      await axios.put(`${APP_URL}/api/communities/${communityId}`, 
+      await axios.put(`${API_URL}/api/communities/${communityId}`, 
         {name,description}, 
         {headers: {Authorization: `Bearer ${token}`},
       });

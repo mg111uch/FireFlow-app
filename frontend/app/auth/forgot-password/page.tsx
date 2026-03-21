@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
-import { APP_URL } from '@/lib/config';
+import { API_URL } from '@/lib/config';
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState('');
@@ -18,7 +18,7 @@ export default function ForgotPasswordPage() {
         setMessage('');
 
         try {
-            const res = await axios.post(`${APP_URL}/api/forgot-password`, { email });
+            const res = await axios.post(`${API_URL}/api/forgot-password`, { email });
             setMessage(res.data.message);
         } catch (err: any) {
             setError(err.response?.data?.error || 'An error occurred.');

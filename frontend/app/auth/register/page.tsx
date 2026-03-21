@@ -4,7 +4,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { APP_URL } from '@/lib/config';
+import { API_URL } from '@/lib/config';
 
 export default function Register() {
   const [username, setUsername] = useState('');
@@ -25,10 +25,10 @@ export default function Register() {
       return;
     }
     try {
-      const res = await axios.post(`${APP_URL}/api/register`, { username, email, password });
+      const res = await axios.post(`${API_URL}/api/register`, { username, email, password });
       if(res.data.message == 'User registered successfully!'){
         alert('Registration successful! ');
-        const loginres = await axios.post(`${APP_URL}/api/login`, { username, password });
+        const loginres = await axios.post(`${API_URL}/api/login`, { username, password });
         localStorage.setItem('token', loginres.data.token);
         router.push('/profile');
       }

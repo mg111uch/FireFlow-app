@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 export default function CreateMarketForm() {
   const router = useRouter();
@@ -62,7 +61,7 @@ export default function CreateMarketForm() {
 
     try {
       const res = await axios.post(
-        `${APP_URL}/api/markets`,
+        `${API_URL}/api/markets`,
         { question, description, options: cleanOptions },
         { headers: { Authorization: `Bearer ${token}` } }
       );

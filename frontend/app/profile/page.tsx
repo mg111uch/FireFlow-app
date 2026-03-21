@@ -10,8 +10,7 @@ import ProfileHeader from './ProfileHeader';
 import Tabs from '../../components/ui/Tabs';
 import FormCard from '../../components/FormCard';
 import CommunitiesList from './CommunitiesList';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -48,8 +47,8 @@ export default function ProfilePage() {
     setError(null); 
     try {
       const [userRes, postsRes] = await Promise.all([ //
-        axios.get(`${APP_URL}/api/users/${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
-        axios.get(`${APP_URL}/api/users/${userId}/posts`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${API_URL}/api/users/${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
+        axios.get(`${API_URL}/api/users/${userId}/posts`, { headers: { Authorization: `Bearer ${token}` } }),
       ]);
       setUser(userRes.data);
       setUserPosts(postsRes.data);
@@ -69,8 +68,8 @@ export default function ProfilePage() {
   const fetchCommunities = async (userId: number, token: string) => {
     try {
       const [commRes, joinedcommRes] = await Promise.all([
-        axios.get(`${APP_URL}/api/communities`),
-        axios.get(`${APP_URL}/api/users/${userId}/communities`, { headers: { Authorization: `Bearer ${token}` } })
+        axios.get(`${API_URL}/api/communities`),
+        axios.get(`${API_URL}/api/users/${userId}/communities`, { headers: { Authorization: `Bearer ${token}` } })
       ])
       setCommunities(commRes.data);
       setJoinedCommunities(joinedcommRes.data);
@@ -82,7 +81,7 @@ export default function ProfilePage() {
 
   const fetchForms = async (token: string) => {
     try {
-      const res = await axios.get(`${APP_URL}/api/forms/my`, {
+      const res = await axios.get(`${API_URL}/api/forms/my`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setForms(res.data);

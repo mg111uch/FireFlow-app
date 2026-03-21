@@ -5,9 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import { Form, FormQuestion } from '../../../../../lib/types';
 import { jwtDecode } from 'jwt-decode';
-import { GPayPaymentModal } from '@/components/PaymentModal';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 interface Answer {
   questionId: number;
@@ -41,7 +39,7 @@ export default function FillFormPage({ params }: { params: Promise<{ formId: str
     const fetchForm = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`${APP_URL}/api/forms/${formId}`);
+        const res = await axios.get(`${API_URL}/api/forms/${formId}`);
         setForm(res.data);
         // Initialize answers state
         const initialAnswers = res.data.questions.map((q: FormQuestion) => ({
@@ -103,7 +101,7 @@ export default function FillFormPage({ params }: { params: Promise<{ formId: str
 
    const submitForm = async () => {
      try {
-       await axios.post(`${APP_URL}/api/forms/${formId}/submit`, { 
+       await axios.post(`${API_URL}/api/forms/${formId}/submit`, { 
          answers,
          form_price: form?.form_price || 0
        }, {
@@ -118,32 +116,6 @@ export default function FillFormPage({ params }: { params: Promise<{ formId: str
        setSubmitting(false);
      }
    };
-
-  const handlePaymentSuccess = async (paymentDetails: any) => {
-    setShowPayment(false);
-    setSubmitting(true);
-    try {
-      // Submit form with payment details
-      await axios.post(`${APP_URL}/api/forms/${formId}/submit`, { 
-        answers,
-        paymentDetails
-      }, {
-        headers: currentUser ? { Authorization: `Bearer ${localStorage.getItem('token')}` } : {}
-      });
-      alert('Payment successful! Form submitted.');
-      router.push(returnUrl);
-    } catch (err: any) {
-      console.error('Error submitting form after payment:', err);
-      setError(err.response?.data?.error || 'Payment succeeded but form submission failed.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handlePaymentFailure = (error?: any) => {
-    setError('Payment failed. Please try again.');
-    setShowPayment(false);
-  };
 
   if (loading) {
     return <div className="container mx-auto p-4 text-center">Loading form...</div>;
@@ -220,13 +192,7 @@ export default function FillFormPage({ params }: { params: Promise<{ formId: str
       </form>
 
       {/* Payment Modal */}
-       <GPayPaymentModal
-         isOpen={showPayment}
-         onClose={() => setShowPayment(false)}
-         amount={form?.form_price || 0}
-         onPaymentSuccess={handlePaymentSuccess}
-         onPaymentFailure={handlePaymentFailure}
-       />
+
     </div>
   );
 }

@@ -6,8 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import { Post } from '../../lib/types';
 import PostCard from '../../components/PostCard';
-
-const APP_URL = process.env.NEXT_PUBLIC_URL;
+import { API_URL } from '@/lib/config';
 
 export default function SearchPage() {
     const router = useRouter();
@@ -27,7 +26,7 @@ export default function SearchPage() {
         const token = localStorage.getItem('token');
 
         try {
-            const res = await axios.get(`${APP_URL}/api/search?q=${query}`, {
+            const res = await axios.get(`${API_URL}/api/search?q=${query}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setResults(res.data);
