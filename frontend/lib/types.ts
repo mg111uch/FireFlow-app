@@ -158,3 +158,43 @@ export interface Market {
   options: MarketOption[]; // Populated with stats when fetched
   user_trades?: MarketTrade[]; // If fetched for a logged-in user
 }
+
+// Shop types
+export interface Shop {
+  id: string;
+  name: string;
+  description?: string;
+  owner_id: number;
+  owner_username?: string;
+  theme?: string;
+  created_at: string;
+}
+
+export interface Product {
+  id: string;
+  shop_id: string;
+  name: string;
+  description?: string;
+  price: number;
+  image_url?: string;
+  stock: number;
+  category?: string;
+  created_at: string;
+}
+
+export interface CartItem {
+  product_id: string;
+  product: Product;
+  quantity: number;
+}
+
+export interface Order {
+  id: string;
+  shop_id: string;
+  customer_id: number;
+  customer_username?: string;
+  items: CartItem[];
+  total: number;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered';
+  created_at: string;
+}

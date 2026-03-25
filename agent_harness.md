@@ -3,9 +3,8 @@
 
 ## TASK
 
-What is the error at line 299 in `React/reddit-clone/frontend/app/chats/[userId]/page.tsx`.
+How could i make a cartBlock component so that user can drag and drop cart system for their forms items in `React/reddit-clone/frontend/app/create-post/CreateServicePage.tsx`
 Do not give code, just a concise plan or answer.
-
 
 ## Code Execution & Validation Environment
 

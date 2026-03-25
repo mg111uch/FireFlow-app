@@ -4,9 +4,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-import { Post } from '../../lib/types';
-import PostCard from '../../components/PostCard';
+import { Post } from '../../../lib/types';
+import PostCard from '../../../components/PostCard';
 import { API_URL } from '@/lib/config';
 
 export default function SavedPostsPage() {

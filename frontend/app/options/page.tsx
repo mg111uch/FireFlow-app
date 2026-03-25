@@ -14,7 +14,9 @@ export default function OptionsPage() {
     // { id: 'display', name: 'Display & Accessibility', description: 'Customize the app theme, font size, and accessibility features.', href: '#' },
     // { id: 'security', name: 'Security', description: 'Review security activity and connected devices.', href: '#' },
     // { id: 'help', name: 'Help & Support', description: 'Find answers to common questions or contact support.', href: '#' },
-    { id: 'saved', name: 'Saved Posts', description: 'View posts you have bookmarked.', href: '/saved-posts' },
+    { id: 'saved', name: 'Saved Posts', description: 'View posts you have bookmarked.', href: '/options/saved-posts' },
+    { id: 'shop', name: 'My Shop', description: 'Create and manage your custom store with products and cart', href: '/shop' },
+    { id: 'generative-ui', name: 'Generative UI', description: 'Create custom UI layouts using AI', href: '/options/generative-ui' },
     { id: 'about', name: 'About App', description: 'Information about the application version and terms of service.', href: '#' },
   ];
 
@@ -25,9 +27,6 @@ export default function OptionsPage() {
 
   return (
     <div className="container mx-auto p-2">
-      <button onClick={() => router.back()} className="bg-gray-600 text-white mb-4 px-4 py-2 rounded-md hover:bg-gray-300">
-        Go Back
-      </button>
 
       <h1 className="text-lg font-bold mb-6">Options & Settings</h1>
 
@@ -35,7 +34,7 @@ export default function OptionsPage() {
         <ul>
           {settingsOptions.map((option, index) => (
             <li key={option.id} className={`${index > 0 ? 'border-t border-gray-200' : ''}`}>
-              <Link href={option.href} className="block p-4 hover:bg-gray-50 transition-colors duration-200">
+              <Link href={option.href} className="block p-4 hover:bg-gray-800">
                 <h2 className="text-lg font-semibold text-gray-300">{option.name}</h2>
                 <p className="text-sm text-gray-400">{option.description}</p>
               </Link>

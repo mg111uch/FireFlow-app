@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
-import { Community } from '../../../lib/types';
+import { Community } from '../../../../lib/types';
 import { API_URL } from '@/lib/config';
 
 export default function EditCommunityPage({ params }: { params: Promise<{ communityId: string }> }) {

@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useNotification } from '../../context/NotificationContext';
+import { useNotification } from '../../../context/NotificationContext';
 import { useAuth } from '@/context/AuthContext';
 import { Notification } from '@/lib/types';
 import { formatTimeAgo } from '@/lib/utils';

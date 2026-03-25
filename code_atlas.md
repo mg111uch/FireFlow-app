@@ -8,9 +8,9 @@
 Legend: │=sep ►=internal ●=external ⚡=entry 🔴=HIGH 🟡=MED 🟢=LOW ⚪=SAFE
 
 ## Codebase size
-Total files processed: 109
-Total lines of code: 12713
-Total tokens: 121225
+Total files processed: 118
+Total lines of code: 13849
+Total tokens: 133018
 ## End Codebase size
 
 Entries: F005
@@ -75,17 +75,25 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   ├── [] PaymentCallbackPage.test.tsx [277 LOC, 2008 tokens]
 │   │   └── [] useRazorpayPayment.test.ts [348 LOC, 2835 tokens]
 │   ├── app/
-│   │   ├── saved-posts/
-│   │   │   └── [] page.tsx [87 LOC, 699 tokens]
-│   │   ├── edit-community/
-│   │   │   └── [communityId]/
-│   │   │       └── [] page.tsx [160 LOC, 1171 tokens]
 │   │   ├── communities/
+│   │   │   ├── edit-community/
+│   │   │   │   └── [communityId]/
+│   │   │   │       └── [] page.tsx [160 LOC, 1171 tokens]
 │   │   │   ├── [communityId]/
 │   │   │   │   └── [] page.tsx [91 LOC, 795 tokens]
 │   │   │   └── [] page.tsx [49 LOC, 312 tokens]
 │   │   ├── options/
-│   │   │   └── [] page.tsx [63 LOC, 705 tokens]
+│   │   │   ├── saved-posts/
+│   │   │   │   └── [] page.tsx [86 LOC, 699 tokens]
+│   │   │   ├── generative-ui/
+│   │   │   │   ├── [] examplePrompts.ts [171 LOC, 1347 tokens]
+│   │   │   │   ├── [] utils.ts [109 LOC, 1035 tokens]
+│   │   │   │   ├── [] ComponentEditor.tsx [119 LOC, 972 tokens]
+│   │   │   │   ├── [] ElementRenderer.tsx [82 LOC, 665 tokens]
+│   │   │   │   └── [] page.tsx [197 LOC, 1582 tokens]
+│   │   │   ├── notifications/
+│   │   │   │   └── [] page.tsx [110 LOC, 939 tokens]
+│   │   │   └── [] page.tsx [62 LOC, 727 tokens]
 │   │   ├── search/
 │   │   │   └── [] page.tsx [74 LOC, 549 tokens]
 │   │   ├── services/
@@ -105,6 +113,10 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   │   ├── [id]/
 │   │   │   │   └── [] page.tsx [299 LOC, 2597 tokens]
 │   │   │   └── [] CommentCard.tsx [199 LOC, 1790 tokens]
+│   │   ├── shop/
+│   │   │   ├── [userId]/
+│   │   │   │   └── [] page.tsx [160 LOC, 1666 tokens]
+│   │   │   └── [] page.tsx [223 LOC, 2652 tokens]
 │   │   ├── payment/
 │   │   │   └── callback/
 │   │   │       ├── verify/
@@ -121,8 +133,6 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   │   ├── [] QuestionEditor.tsx [174 LOC, 1419 tokens]
 │   │   │   ├── [] FormPreview.tsx [82 LOC, 639 tokens]
 │   │   │   └── [] page.tsx [203 LOC, 1474 tokens]
-│   │   ├── notifications/
-│   │   │   └── [] page.tsx [110 LOC, 939 tokens]
 │   │   ├── auth/
 │   │   │   ├── forgot-password/
 │   │   │   │   └── [] page.tsx [58 LOC, 511 tokens]
@@ -134,7 +144,7 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   │       └── [] page.tsx [96 LOC, 778 tokens]
 │   │   ├── chats/
 │   │   │   ├── [userId]/
-│   │   │   │   └── [] page.tsx [384 LOC, 3512 tokens]
+│   │   │   │   └── [] page.tsx [432 LOC, 4078 tokens]
 │   │   │   └── [] page.tsx [140 LOC, 1042 tokens]
 │   │   ├── profile/
 │   │   │   ├── [userId]/
@@ -146,7 +156,7 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   │   └── [] page.tsx [181 LOC, 1512 tokens]
 │   │   ├── [] 3d-rocket.png [0 LOC, 0 tokens]
 │   │   ├── [] globals.css [26 LOC, 144 tokens]
-│   │   ├── [] layout.tsx [50 LOC, 327 tokens]
+│   │   ├── [] layout.tsx [53 LOC, 349 tokens]
 │   │   └── [] page.tsx [346 LOC, 2940 tokens]
 │   ├── components/
 │   │   ├── ui/
@@ -159,9 +169,11 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   ├── [] MarketCard.tsx [75 LOC, 594 tokens]
 │   │   └── [] BottomAppBar.tsx [61 LOC, 572 tokens]
 │   ├── hooks/
+│   │   ├── [] useGemini.ts [77 LOC, 502 tokens]
 │   │   └── [] useRazorpayPayment.ts [177 LOC, 1277 tokens]
 │   ├── context/
 │   │   ├── [] NotificationContext.tsx [106 LOC, 745 tokens]
+│   │   ├── [] CartContext.tsx [78 LOC, 540 tokens]
 │   │   ├── [] SocketContext.tsx [64 LOC, 469 tokens]
 │   │   ├── [] AuthContext.tsx [106 LOC, 696 tokens]
 │   │   └── [] PostContext.tsx [131 LOC, 995 tokens]
@@ -173,13 +185,12 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │       └── [] payment-flow.cy.ts [259 LOC, 2307 tokens]
 │   ├── lib/
 │   │   ├── [] utils.ts [64 LOC, 559 tokens]
-│   │   ├── [] types.ts [159 LOC, 924 tokens]
+│   │   ├── [] types.ts [200 LOC, 1116 tokens]
 │   │   ├── [] icons.tsx [200 LOC, 6490 tokens]
-│   │   ├── [] config.ts [5 LOC, 37 tokens]
+│   │   ├── [] config.ts [7 LOC, 54 tokens]
 │   │   └── [] services-data.ts [216 LOC, 2272 tokens]
-│   ├── [] package.json [46 LOC, 443 tokens]
+│   ├── [] package.json [47 LOC, 456 tokens]
 │   ├── [] next.config.js [5 LOC, 32 tokens]
-│   ├── [] .env.local [7 LOC, 69 tokens]
 │   ├── [] tsconfig.json [27 LOC, 183 tokens]
 │   ├── [] jest.config.ts [20 LOC, 144 tokens]
 │   ├── [] cypress.config.ts [27 LOC, 169 tokens]
@@ -190,10 +201,10 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   └── [] playwright.config.ts [45 LOC, 291 tokens]
 ├── [] package.json [8 LOC, 52 tokens]
 ├── [] cxt_switch.md [29 LOC, 372 tokens]
-├── [] agent_harness.md [48 LOC, 548 tokens]
-├── [] code_atlas.md [206 LOC, 3093 tokens]
+├── [] agent_harness.md [43 LOC, 521 tokens]
+├── [] code_atlas.md [211 LOC, 3200 tokens]
 ├── [] code_dump.txt [0 LOC, 0 tokens]
-├── [] README.md [160 LOC, 840 tokens]
-├── [] project_tools.md [30 LOC, 1038 tokens]
+├── [] README.md [193 LOC, 1372 tokens]
+├── [] project_tools.md [30 LOC, 1044 tokens]
 └── [] Issues and Fixes.md [38 LOC, 375 tokens]
 ### End Tree

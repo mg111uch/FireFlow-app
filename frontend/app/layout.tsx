@@ -8,6 +8,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { SocketProvider } from '@/context/SocketContext';
 import { PostProvider } from '@/context/PostContext';
 import { NotificationProvider } from '@/context/NotificationContext';
+import { CartProvider } from '@/context/CartContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,12 +35,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthProvider>
           <SocketProvider> 
             <NotificationProvider>
-              <PostProvider>  
-                <TopAppBar /> 
-                <div className="pt-16 pb-20">                
-                  {children}                  
-                </div> 
-                <BottomAppBar /> 
+              <PostProvider>
+                <CartProvider>  
+                  <TopAppBar /> 
+                  <div className="pt-16 pb-20">                
+                    {children}                  
+                  </div> 
+                  <BottomAppBar /> 
+                </CartProvider>
               </PostProvider> 
             </NotificationProvider> 
           </SocketProvider> 
