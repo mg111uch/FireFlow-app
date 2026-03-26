@@ -220,12 +220,6 @@ const db = new sqlite3.Database(dbPath, (err) => {
            FOREIGN KEY (creator_id) REFERENCES users(id) ON DELETE CASCADE
          )
        `);
-       // Add columns if they don't exist (for existing databases)
-       db.run(`ALTER TABLE forms ADD COLUMN form_type TEXT DEFAULT 'general'`, (err) => {});
-       db.run(`ALTER TABLE forms ADD COLUMN service_name TEXT`, (err) => {});
-       db.run(`ALTER TABLE forms ADD COLUMN subservice_name TEXT`, (err) => {});
-       db.run(`ALTER TABLE forms ADD COLUMN form_price INTEGER DEFAULT 0`, (err) => {});
-       db.run(`ALTER TABLE form_submissions ADD COLUMN form_price INTEGER DEFAULT 0`, (err) => {});
 // n
       // Form Questions table
       db.run(`
@@ -323,6 +317,50 @@ const db = new sqlite3.Database(dbPath, (err) => {
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           expires_at TIMESTAMP,
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+      `);
+
+      // Shops table
+      db.run(`
+        CREATE TABLE IF NOT EXISTS shops (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL,
+          description TEXT,
+          owner_id INTEGER NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (owner_id) REFERENCES users(id)
+        )
+      `);
+
+      // Shop Products table
+      db.run(`
+        CREATE TABLE IF NOT EXISTS shop_products (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          shop_id INTEGER NOT NULL,
+          name TEXT NOT NULL,
+          description TEXT,
+          price INTEGER NOT NULL,
+          stock INTEGER DEFAULT 10,
+          category TEXT,
+          image_url TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (shop_id) REFERENCES shops(id) ON DELETE CASCADE
+        )
+      `);
+
+      // Shop Orders table
+      db.run(`
+        CREATE TABLE IF NOT EXISTS shop_orders (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          shop_id INTEGER NOT NULL,
+          customer_id INTEGER,
+          customer_username TEXT,
+          items TEXT NOT NULL,
+          total INTEGER NOT NULL,
+          status TEXT DEFAULT 'pending',
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (shop_id) REFERENCES shops(id) ON DELETE CASCADE,
+          FOREIGN KEY (customer_id) REFERENCES users(id)
         )
       `);
 

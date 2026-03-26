@@ -41,6 +41,9 @@ app.use('/api/notifications', require('./routes/notifications')(io, onlineUsers)
 app.use('/api/forms', require('./routes/forms')(io, onlineUsers));
 app.use('/api/chats', require('./routes/chats')(io, onlineUsers));
 app.use('/api/markets', require('./routes/markets')(io, onlineUsers));
+app.use('/api/shops', require('./routes/shops'));
+app.use('/api/shop-products', require('./routes/shop-products'));
+app.use('/api/shop-orders', require('./routes/shop-orders'));
 
 // Additional routes
 app.get('/api/search', (req, res) => {

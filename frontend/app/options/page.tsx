@@ -15,7 +15,6 @@ export default function OptionsPage() {
     // { id: 'security', name: 'Security', description: 'Review security activity and connected devices.', href: '#' },
     // { id: 'help', name: 'Help & Support', description: 'Find answers to common questions or contact support.', href: '#' },
     { id: 'saved', name: 'Saved Posts', description: 'View posts you have bookmarked.', href: '/options/saved-posts' },
-    { id: 'shop', name: 'My Shop', description: 'Create and manage your custom store with products and cart', href: '/shop' },
     { id: 'generative-ui', name: 'Generative UI', description: 'Create custom UI layouts using AI', href: '/options/generative-ui' },
     { id: 'about', name: 'About App', description: 'Information about the application version and terms of service.', href: '#' },
   ];

@@ -3,7 +3,7 @@
 
 ## TASK
 
-How could i make a cartBlock component so that user can drag and drop cart system for their forms items in `React/reddit-clone/frontend/app/create-post/CreateServicePage.tsx`
+Can a common product card component be made which could be used to display products in both `React/reddit-clone/frontend/app/shop/page.tsx` and `React/reddit-clone/frontend/app/shop/[userId]/page.tsx`. All products card in outer tab should also show `Add to cart` button along with `View shop` button. Also cart button should also show in main page at the same position.
 Do not give code, just a concise plan or answer.
 
 ## Code Execution & Validation Environment

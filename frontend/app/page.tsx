@@ -195,7 +195,7 @@ export default function Home() {
         </h2>
         <div className="flex gap-2">
           <button
-            onClick={() => router.push('/filter')}
+            onClick={() => router.push('/search')}
             className="bg-gray-600 text-white px-3 py-1 rounded-md hover:bg-gray-700 text-xm font-semibold"
           >
             Filter feed

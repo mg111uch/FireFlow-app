@@ -39,8 +39,7 @@ export default function SearchPage() {
 
     return (
         <div className="container mx-auto p-2">
-            <h1 className="text-2xl font-bold mb-4">Search Posts</h1>
-            <form onSubmit={handleSearch} className="space-y-2 mb-6">
+            <form onSubmit={handleSearch} className="space-y-2 space-x-2 mb-6 flex justify-center">
                 <input
                     type="text"
                     value={query}
@@ -49,7 +48,7 @@ export default function SearchPage() {
                     className="border p-2 w-full rounded-l-md"
                 />
                 <button type="submit" 
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md" 
+                    className="bg-blue-500 text-white px-4 rounded-md" 
                     disabled={loading}>
                     {loading ? '...' : 'Search'}
                 </button>
