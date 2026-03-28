@@ -2,8 +2,8 @@
 
 ## Prerequisites
 
-- Node.js (v18+)
-- npm or yarn
+- Next.js 15.3.3
+- Node.js (v18+) and npm 
 - SQLite database (included)
 
 ## Running the Application

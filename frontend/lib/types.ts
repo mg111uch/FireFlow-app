@@ -54,6 +54,10 @@ export interface UserDetails {
   username: string;
   email: string;
   profile_img_url?:string;
+  display_name?: string | null;
+  bio?: string | null;
+  country?: string | null;
+  state?: string | null;
   created_at: string;
   followerCount: number; 
   followingCount: number; 
@@ -195,6 +199,7 @@ export interface Order {
   customer_username?: string;
   items: CartItem[];
   total: number;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered';
+  status: 'pending' | 'ready' | 'shipped' | 'delivered';
+  gig_id?: number;
   created_at: string;
 }

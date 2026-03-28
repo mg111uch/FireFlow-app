@@ -35,6 +35,7 @@ app.use('/api/auth', require('./routes/auth')(io, onlineUsers));
 app.use('/api/posts', require('./routes/posts')(io, onlineUsers));
 app.use('/api/agent', require('./routes/agent')(io, onlineUsers));
 app.use('/api/payments', authenticateToken, require('./routes/payments')(io, onlineUsers));
+app.use('/api/flowpay', authenticateToken, require('./routes/flowpay'));
 app.use('/api/communities', require('./routes/communities')(io, onlineUsers));
 app.use('/api/users', require('./routes/users')(io, onlineUsers));
 app.use('/api/notifications', require('./routes/notifications')(io, onlineUsers));
@@ -44,6 +45,7 @@ app.use('/api/markets', require('./routes/markets')(io, onlineUsers));
 app.use('/api/shops', require('./routes/shops'));
 app.use('/api/shop-products', require('./routes/shop-products'));
 app.use('/api/shop-orders', require('./routes/shop-orders'));
+app.use('/api/gigs', require('./routes/gigs'));
 
 // Additional routes
 app.get('/api/search', (req, res) => {

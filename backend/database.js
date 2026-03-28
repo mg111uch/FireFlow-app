@@ -20,9 +20,50 @@ const db = new sqlite3.Database(dbPath, (err) => {
           username TEXT NOT NULL UNIQUE,
           email TEXT NOT NULL UNIQUE,
           password TEXT NOT NULL,
+          display_name TEXT,
+          bio TEXT,
+          avatar_url TEXT,
+          location TEXT,
+          city TEXT,
+          state TEXT,
+          country TEXT,
+          website TEXT,
+          phone TEXT,
+          adhar_card_no TEXT,
+          pan_card_no TEXT,
+          driving_licence TEXT,
+          date_of_birth DATE,
+          gender TEXT,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
+
+      // Migration: Add new columns to users table if not exists
+      const userColumns = [
+        'display_name TEXT',
+        'bio TEXT',
+        'avatar_url TEXT',
+        'location TEXT',
+        'city TEXT',
+        'state TEXT',
+        'country TEXT',
+        'website TEXT',
+        'phone TEXT',
+        'adhar_card_no TEXT',
+        'pan_card_no TEXT',
+        'driving_licence TEXT',
+        'date_of_birth DATE',
+        'gender TEXT'
+      ];
+      
+      userColumns.forEach((col) => {
+        const colName = col.split(' ')[0];
+        db.run(`ALTER TABLE users ADD COLUMN ${colName} ${col.split(' ')[1]}`, (err) => {
+          if (err && !err.message.includes('duplicate column name')) {
+            console.error(`Error adding ${colName} column:`, err.message);
+          }
+        });
+      });
 // n        
       // Communities table
       db.run(`
@@ -358,6 +399,7 @@ const db = new sqlite3.Database(dbPath, (err) => {
           items TEXT NOT NULL,
           total INTEGER NOT NULL,
           status TEXT DEFAULT 'pending',
+          gig_id INTEGER,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (shop_id) REFERENCES shops(id) ON DELETE CASCADE,
           FOREIGN KEY (customer_id) REFERENCES users(id)
@@ -391,7 +433,51 @@ const db = new sqlite3.Database(dbPath, (err) => {
         )
       `, (err) => {
         if (err) console.error('Error creating payments table:', err.message);
-        // else console.log('Payments table ready.');
+      });
+
+      db.run(`
+        CREATE TABLE IF NOT EXISTS flowpay_payments (
+          id              INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id         INTEGER NOT NULL,
+          order_id        TEXT NOT NULL,
+          card_last4      TEXT,
+          status          TEXT NOT NULL DEFAULT 'created',
+          created_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+      `, (err) => {
+        if (err) console.error('Error creating flowpay_payments table:', err.message);
+      });
+
+      // Gigs table (rides and deliveries)
+      db.run(`
+        CREATE TABLE IF NOT EXISTS gigs (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          type TEXT NOT NULL CHECK(type IN ('ride', 'delivery')),
+          pickup_address TEXT NOT NULL,
+          pickup_lat REAL,
+          pickup_lng REAL,
+          dropoff_address TEXT NOT NULL,
+          dropoff_lat REAL,
+          dropoff_lng REAL,
+          details TEXT,
+          price INTEGER NOT NULL,
+          status TEXT DEFAULT 'open' CHECK(status IN ('open', 'accepted', 'completed', 'cancelled')),
+          user_id INTEGER NOT NULL,
+          driver_id INTEGER,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id),
+          FOREIGN KEY (driver_id) REFERENCES users(id)
+        )
+      `, (err) => {
+        if (err) console.error('Error creating gigs table:', err.message);
+      });
+
+      // Migration: Add gig_id column to shop_orders if not exists
+      db.run(`ALTER TABLE shop_orders ADD COLUMN gig_id INTEGER`, (err) => {
+        if (err && !err.message.includes('duplicate column name')) {
+          console.error('Error adding gig_id column:', err.message);
+        }
       });
     });
   }

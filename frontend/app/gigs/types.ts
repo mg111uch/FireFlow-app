@@ -1,0 +1,27 @@
+export interface GigDetails {
+  passengers?: number;
+  passengerName?: string;
+  passengerContact?: string;
+  packageDescription?: string;
+  weight?: string;
+  fragile?: boolean;
+}
+
+export interface Gig {
+  id: number;
+  type: 'ride' | 'delivery';
+  pickup_address: string;
+  pickup_lat: number | null;
+  pickup_lng: number | null;
+  dropoff_address: string;
+  dropoff_lat: number | null;
+  dropoff_lng: number | null;
+  details: GigDetails | null;
+  price: number;
+  status: 'open' | 'accepted' | 'completed' | 'cancelled';
+  user_id: number;
+  user_username: string;
+  driver_id: number | null;
+  driver_username: string | null;
+  created_at: string;
+}

@@ -12,7 +12,7 @@ router.get('/:id', optionalAuthenticateToken, (req, res) => {
   const loggedInUserId = req.user?.id; // The ID of the user making the request
 
   db.get(
-    'SELECT id, username, email, created_at FROM users WHERE id = ?',
+    'SELECT id, username, email, country, state, bio, display_name, created_at FROM users WHERE id = ?',
     [id],
     (err, user) => {
       if (err) {
@@ -197,6 +197,62 @@ router.get('/:id/following', (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
+});
+
+// GET current user's profile details
+router.get('/me/profile', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+
+  db.get(
+    `SELECT id, username, email, display_name, bio, avatar_url, location, city, state, country, website, phone, adhar_card_no, pan_card_no, driving_licence, date_of_birth, gender, created_at 
+     FROM users WHERE id = ?`,
+    [userId],
+    (err, user) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      if (!user) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+      res.json(user);
+    }
+  );
+});
+
+// UPDATE current user's profile details
+router.put('/me/profile', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const { display_name, bio, avatar_url, location, city, state, country, website, phone, adhar_card_no, pan_card_no, driving_licence, date_of_birth, gender } = req.body;
+
+  const query = `
+    UPDATE users SET 
+      display_name = COALESCE(?, display_name),
+      bio = COALESCE(?, bio),
+      avatar_url = COALESCE(?, avatar_url),
+      location = COALESCE(?, location),
+      city = COALESCE(?, city),
+      state = COALESCE(?, state),
+      country = COALESCE(?, country),
+      website = COALESCE(?, website),
+      phone = COALESCE(?, phone),
+      adhar_card_no = COALESCE(?, adhar_card_no),
+      pan_card_no = COALESCE(?, pan_card_no),
+      driving_licence = COALESCE(?, driving_licence),
+      date_of_birth = COALESCE(?, date_of_birth),
+      gender = COALESCE(?, gender)
+    WHERE id = ?
+  `;
+
+  db.run(
+    query,
+    [display_name, bio, avatar_url, location, city, state, country, website, phone, adhar_card_no, pan_card_no, driving_licence, date_of_birth, gender, userId],
+    function (err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.json({ message: 'Profile updated successfully.' });
+    }
+  );
 });
 
 module.exports = (io, onlineUsers) => {

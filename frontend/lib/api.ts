@@ -56,4 +56,6 @@ export const ordersApi = {
     fetchApi('/api/shop-orders', { method: 'POST', body: JSON.stringify(data) }),
   updateStatus: (id: number, status: string) =>
     fetchApi(`/api/shop-orders/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
+  resetStatus: (id: number) =>
+    fetchApi(`/api/shop-orders/${id}/reset`, { method: 'POST' }),
 };

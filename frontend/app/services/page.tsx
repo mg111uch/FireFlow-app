@@ -7,6 +7,15 @@ import { services } from '@/lib/services-data';
 export default function ServicesPage() {
   return (
     <div className="container mx-auto p-2">
+      <div className="flex gap-4 mb-4 justify-center">
+        <Link href="/gigs" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+          Gigs
+        </Link>
+        <Link href="/reach" className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors">
+          Reach
+        </Link>
+      </div>
+
       <h1 className="text-center text-xl text-gray-400 font-bold mb-3">Add your Service to start earning.</h1>
 
       {services.length === 0 ? (

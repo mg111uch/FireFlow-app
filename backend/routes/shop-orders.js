@@ -75,7 +75,7 @@ router.put('/:id/status', authenticateToken, (req, res) => {
   const { status } = req.body;
   const userId = req.user.id;
 
-  const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+  const validStatuses = ['pending', 'ready', 'shipped', 'delivered', 'cancelled'];
   if (!validStatuses.includes(status)) {
     return res.status(400).json({ error: 'Invalid status' });
   }
@@ -97,7 +97,82 @@ router.put('/:id/status', authenticateToken, (req, res) => {
         return res.status(403).json({ error: 'Not authorized to update this order' });
       }
 
-      db.run('UPDATE shop_orders SET status = ? WHERE id = ?', [status, id], function(err) {
+      // If status is 'ready', create a gig
+      const createGigAndUpdateOrder = () => {
+        const details = JSON.stringify({
+          order_id: order.id,
+          items: JSON.parse(order.items || '[]'),
+          customer_username: order.customer_username
+        });
+
+        db.run(`
+          INSERT INTO gigs (type, pickup_address, dropoff_address, details, price, user_id, status)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, ['delivery', shop.name + ' - ' + (shop.description || 'Shop'), order.customer_username || 'Customer Address', details, order.total, order.customer_id || shop.owner_id, 'open'], function(err) {
+          if (err) {
+            console.error('Error creating gig:', err);
+          }
+          const gigId = this.lastID;
+          
+          // Update order with gig_id
+          db.run('UPDATE shop_orders SET status = ?, gig_id = ? WHERE id = ?', [status, gigId, id], function(err) {
+            if (err) {
+              return res.status(500).json({ error: err.message });
+            }
+            db.get('SELECT * FROM shop_orders WHERE id = ?', [id], (err, updatedOrder) => {
+              if (err) {
+                return res.status(500).json({ error: err.message });
+              }
+              updatedOrder.items = JSON.parse(updatedOrder.items || '[]');
+              res.json(updatedOrder);
+            });
+          });
+        });
+      };
+
+      if (status === 'ready' && !order.gig_id) {
+        createGigAndUpdateOrder();
+      } else {
+        db.run('UPDATE shop_orders SET status = ? WHERE id = ?', [status, id], function(err) {
+          if (err) {
+            return res.status(500).json({ error: err.message });
+          }
+          db.get('SELECT * FROM shop_orders WHERE id = ?', [id], (err, updatedOrder) => {
+            if (err) {
+              return res.status(500).json({ error: err.message });
+            }
+            updatedOrder.items = JSON.parse(updatedOrder.items || '[]');
+            res.json(updatedOrder);
+          });
+        });
+      }
+    });
+  });
+});
+
+// RESET order status to 'pending' (for testing)
+router.post('/:id/reset', authenticateToken, (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  db.get('SELECT * FROM shop_orders WHERE id = ?', [id], (err, order) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    // Check shop ownership
+    db.get('SELECT * FROM shops WHERE id = ? AND owner_id = ?', [order.shop_id, userId], (err, shop) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      if (!shop) {
+        return res.status(403).json({ error: 'Not authorized to reset this order' });
+      }
+
+      db.run('UPDATE shop_orders SET status = ? WHERE id = ?', ['pending', id], function(err) {
         if (err) {
           return res.status(500).json({ error: err.message });
         }
@@ -105,7 +180,7 @@ router.put('/:id/status', authenticateToken, (req, res) => {
           if (err) {
             return res.status(500).json({ error: err.message });
           }
-          updatedOrder.items = JSON.parse(updatedOrder.items);
+          updatedOrder.items = JSON.parse(updatedOrder.items || '[]');
           res.json(updatedOrder);
         });
       });

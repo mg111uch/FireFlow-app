@@ -18,6 +18,8 @@ const db = require('../database');
 
 const router = express.Router();
 
+const USE_MOCK_GATEWAY = process.env.USE_MOCK_GATEWAY === 'true';
+
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
@@ -39,6 +41,27 @@ router.post('/create-order', async (req, res) => {
     }
 
     const amountPaise = Math.round(amount * 100);
+
+    if (USE_MOCK_GATEWAY) {
+      const mockOrderId = 'fp_order_' + crypto.randomBytes(12).toString('hex');
+      
+      db.run(
+        `INSERT INTO payments (user_id, razorpay_order_id, amount_paise, currency, status, purpose)
+         VALUES (?, ?, ?, ?, 'created', 'subscription_fee')`,
+        [req.user.id, mockOrderId, amountPaise, 'INR'],
+        (err) => {
+          if (err) console.error('[Flowpay] DB insert error:', err.message);
+        }
+      );
+
+      return res.status(200).json({
+        orderId: mockOrderId,
+        amount: amountPaise,
+        currency: 'INR',
+        keyId: 'flowpay_mock_key',
+        isMock: true,
+      });
+    }
 
     const options = {
       amount: amountPaise,
@@ -87,6 +110,41 @@ router.post('/verify', async (req, res) => {
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res.status(400).json({ error: 'Missing payment verification fields.' });
+    }
+
+    if (USE_MOCK_GATEWAY || razorpay_order_id.startsWith('fp_order_')) {
+      const expectedSignature = crypto
+        .createHmac('sha256', process.env.FLOWPAY_SECRET || 'flowpay_secret_key')
+        .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+        .digest('hex');
+
+      if (razorpay_signature !== expectedSignature) {
+        db.run(
+          `UPDATE payments SET status = 'failed' WHERE razorpay_order_id = ? AND user_id = ?`,
+          [razorpay_order_id, req.user.id]
+        );
+        return res.status(400).json({ error: 'Payment signature verification failed.' });
+      }
+
+      db.run(
+        `UPDATE payments
+         SET status = 'verified',
+             razorpay_payment_id = ?,
+             verified_at = CURRENT_TIMESTAMP
+         WHERE razorpay_order_id = ? AND user_id = ?`,
+        [razorpay_payment_id, razorpay_order_id, req.user.id],
+        (err) => {
+          if (err) console.error('[Flowpay] DB update error:', err.message);
+        }
+      );
+
+      console.log(`[Flowpay] Verified — user ${req.user.id}, payment ${razorpay_payment_id}`);
+
+      return res.status(200).json({
+        success: true,
+        paymentId: razorpay_payment_id,
+        message: 'Payment verified and subscription activated.',
+      });
     }
 
     // Step 1: Verify HMAC-SHA256 signature

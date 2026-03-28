@@ -3,7 +3,7 @@
 
 ## TASK
 
-Can a common product card component be made which could be used to display products in both `React/reddit-clone/frontend/app/shop/page.tsx` and `React/reddit-clone/frontend/app/shop/[userId]/page.tsx`. All products card in outer tab should also show `Add to cart` button along with `View shop` button. Also cart button should also show in main page at the same position.
+How to add page for user details in `React/reddit-clone/frontend/app/options/page.tsx` so that user can enter his personal details which adds to user table.
 Do not give code, just a concise plan or answer.
 
 ## Code Execution & Validation Environment
@@ -20,12 +20,23 @@ Do not give code, just a concise plan or answer.
 - **Backend Source_code:** (Working directory) `/home/manigupt/Hello/React/reddit-clone/backend`
 - **Frontend Source_code:** (Working directory) `/home/manigupt/Hello/React/reddit-clone/frontend`
 
+## Prerequisites
+
+- Next.js 15.3.3
+- Node.js (v18+) and npm 
+- SQLite database (included)
+
 ## Project related tools
 
 - **Tool usage command** `cd /home/manigupt/Hello/python/ai_agent/atlas_output && python run_cmds.py /home/manigupt/Hello/React/reddit-clone/project_tools.md <Tool_name>`
 - **Tools available** (Tool_name)
     - Run and record video
     - Ask Gemini
+
+## Rules
+
+- Do not ask to build the frontend unless user asks explicitly.
+- Never read .env* files. Ask user for whatever changes you want to make in them.
 
 ## Core principles
 

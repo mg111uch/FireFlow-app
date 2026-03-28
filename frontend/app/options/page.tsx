@@ -8,15 +8,15 @@ export default function OptionsPage() {
   const router = useRouter();
 
   const settingsOptions = [
-    { id: 'account', name: 'Account Settings', description: 'Manage your profile, email, and password.', href: '/profile' }, // Example linking to existing profile
-    // { id: 'notifications', name: 'Notification Preferences', description: 'Control how you receive alerts and updates.', href: '#' }, // Placeholder link
+    { id: 'account', name: 'Account Settings', description: 'Manage your profile, email, and password.', href: '/options/userdetails' }, // Example linking to existing profile
     // { id: 'privacy', name: 'Privacy Settings', description: 'Adjust your privacy controls and data sharing.', href: '#' },
     // { id: 'display', name: 'Display & Accessibility', description: 'Customize the app theme, font size, and accessibility features.', href: '#' },
     // { id: 'security', name: 'Security', description: 'Review security activity and connected devices.', href: '#' },
     // { id: 'help', name: 'Help & Support', description: 'Find answers to common questions or contact support.', href: '#' },
     { id: 'saved', name: 'Saved Posts', description: 'View posts you have bookmarked.', href: '/options/saved-posts' },
     { id: 'generative-ui', name: 'Generative UI', description: 'Create custom UI layouts using AI', href: '/options/generative-ui' },
-    { id: 'about', name: 'About App', description: 'Information about the application version and terms of service.', href: '#' },
+    { id: 'premium', name: 'Premium Subscription', description: 'Unlock exclusive features and benefits', href: '/options/premium' },
+    // { id: 'about', name: 'About App', description: 'Information about the application version and terms of service.', href: '#' },
   ];
 
   const handleLogout = () => {
