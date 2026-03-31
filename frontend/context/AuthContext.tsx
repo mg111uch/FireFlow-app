@@ -10,6 +10,7 @@ import { API_URL } from '@/lib/config';
 interface AuthContextType {
   currentUser: UserDetails | null;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   loading: boolean;
   token: string | null;
   login: (loginData: any) => Promise<void>;
@@ -22,6 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [token, setToken] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<UserDetails | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true); // True initially while checking token
   const expirationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
@@ -40,6 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setIsAuthenticated(true);
           setCurrentUser(decodedToken);
           setToken(storedToken);
+          setIsAdmin(decodedToken.role === 'admin' || decodedToken.isAdmin === true);
 
           expirationTimeoutRef.current = setTimeout(() => {
             logout();
@@ -72,6 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setToken(receivedToken);
       setCurrentUser(decodedToken);
       setIsAuthenticated(true);
+      setIsAdmin(decodedToken.id === 1 || decodedToken.role === 'admin' || decodedToken.isAdmin === true);
       router.push('/');
     }
   } catch (err: any) {
@@ -91,7 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [router]);
 
   return (
-    <AuthContext.Provider value={{ currentUser, isAuthenticated: !!currentUser, loading, token, login, logout }}>
+    <AuthContext.Provider value={{ currentUser, isAuthenticated: !!currentUser, isAdmin, loading, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

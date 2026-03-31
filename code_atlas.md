@@ -8,9 +8,9 @@
 Legend: │=sep ►=internal ●=external ⚡=entry 🔴=HIGH 🟡=MED 🟢=LOW ⚪=SAFE
 
 ## Codebase size
-Total files processed: 140
-Total lines of code: 16713
-Total tokens: 157235
+Total files processed: 143
+Total lines of code: 15945
+Total tokens: 148183
 ## End Codebase size
 
 Entries: F005
@@ -21,6 +21,19 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 - **Project path:** `/home/manigupt/Hello/React/reddit-clone`
 ### FILE_MAP Tree
 ├── backend/
+│   ├── database/
+│   │   ├── schema/
+│   │   │   ├── [] payments.js [36 LOC, 228 tokens]
+│   │   │   ├── [] forms.js [75 LOC, 465 tokens]
+│   │   │   ├── [] users.js [41 LOC, 282 tokens]
+│   │   │   ├── [] gigs.js [31 LOC, 218 tokens]
+│   │   │   ├── [] auth.js [30 LOC, 169 tokens]
+│   │   │   ├── [] markets.js [45 LOC, 286 tokens]
+│   │   │   ├── [] marketplace.js [53 LOC, 309 tokens]
+│   │   │   ├── [] social.js [165 LOC, 1055 tokens]
+│   │   │   └── [] messaging.js [35 LOC, 235 tokens]
+│   │   ├── [] index.js [106 LOC, 599 tokens]
+│   │   └── [] reddit_clone.db [0 LOC, 0 tokens]
 │   ├── utils/
 │   │   ├── [] socketHandlers.js [225 LOC, 2145 tokens]
 │   │   ├── [] notificationHelper.js [46 LOC, 443 tokens]
@@ -44,30 +57,17 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   ├── [] forms.js [580 LOC, 4769 tokens]
 │   │   ├── [] agent.js [124 LOC, 924 tokens]
 │   │   ├── [] users.js [260 LOC, 2089 tokens]
-│   │   ├── [] gigs.js [332 LOC, 2677 tokens]
+│   │   ├── [] gigs.js [411 LOC, 3279 tokens]
 │   │   ├── [] auth.js [110 LOC, 1038 tokens]
 │   │   ├── [] markets.js [150 LOC, 1367 tokens]
 │   │   ├── [] flowpay.js [154 LOC, 1131 tokens]
 │   │   ├── [] chats.js [180 LOC, 1560 tokens]
 │   │   ├── [] posts.js [22 LOC, 158 tokens]
 │   │   └── [] communities.js [205 LOC, 1708 tokens]
-│   ├── tests/
-│   │   ├── [] auth.test.js [99 LOC, 650 tokens]
-│   │   ├── [] users.test.js [125 LOC, 1002 tokens]
-│   │   ├── [] markets.test.js [105 LOC, 838 tokens]
-│   │   ├── [] chats.test.js [81 LOC, 697 tokens]
-│   │   ├── [] payments.test.js [306 LOC, 2516 tokens]
-│   │   ├── [] forms.test.js [212 LOC, 1583 tokens]
-│   │   ├── [] communities.test.js [97 LOC, 788 tokens]
-│   │   ├── [] posts.test.js [236 LOC, 1735 tokens]
-│   │   ├── [] comments.test.js [93 LOC, 745 tokens]
-│   │   └── [] forms-service.test.js [252 LOC, 1930 tokens]
 │   ├── [] jest.config.js [12 LOC, 76 tokens]
 │   ├── [] package.json [29 LOC, 239 tokens]
 │   ├── [] app.js [61 LOC, 449 tokens]
-│   ├── [] database.js [486 LOC, 3578 tokens]
-│   ├── [] server.js [113 LOC, 928 tokens]
-│   └── [] reddit_clone.db [0 LOC, 0 tokens]
+│   └── [] server.js [113 LOC, 933 tokens]
 ├── agentic_ui/
 │   ├── [] parse_action.js [233 LOC, 1620 tokens]
 │   ├── [] agent.js [287 LOC, 2161 tokens]
@@ -76,9 +76,6 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   ├── [] agent_skill.md [411 LOC, 3226 tokens]
 │   └── [] send_msg.md [34 LOC, 176 tokens]
 ├── frontend/
-│   ├── __tests__/
-│   │   ├── [] PaymentCallbackPage.test.tsx [277 LOC, 2008 tokens]
-│   │   └── [] useRazorpayPayment.test.ts [348 LOC, 2835 tokens]
 │   ├── app/
 │   │   ├── communities/
 │   │   │   ├── edit-community/
@@ -115,9 +112,13 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   │   ├── [serviceName]/
 │   │   │   │   ├── [subserviceName]/
 │   │   │   │   │   └── [] page.tsx [145 LOC, 1113 tokens]
-│   │   │   │   └── [] page.tsx [133 LOC, 1064 tokens]
+│   │   │   │   └── [] page.tsx [124 LOC, 966 tokens]
 │   │   │   ├── [] ResponsesCard.tsx [72 LOC, 622 tokens]
-│   │   │   └── [] page.tsx [36 LOC, 339 tokens]
+│   │   │   ├── [] ShortcutSettings.tsx [204 LOC, 1587 tokens]
+│   │   │   ├── [] ShortcutsContext.tsx [128 LOC, 872 tokens]
+│   │   │   ├── [] ShortcutBar.tsx [49 LOC, 355 tokens]
+│   │   │   ├── [] useShortcuts.ts [49 LOC, 309 tokens]
+│   │   │   └── [] page.tsx [39 LOC, 320 tokens]
 │   │   ├── posts/
 │   │   │   ├── [id]/
 │   │   │   │   └── [] page.tsx [299 LOC, 2597 tokens]
@@ -146,7 +147,7 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   ├── create-post/
 │   │   │   ├── [] ServiceSelector.tsx [141 LOC, 1066 tokens]
 │   │   │   ├── [] CreateMarketForm.tsx [148 LOC, 1103 tokens]
-│   │   │   ├── [] CreateServicePage.tsx [360 LOC, 2476 tokens]
+│   │   │   ├── [] CreateServicePage.tsx [354 LOC, 2429 tokens]
 │   │   │   ├── [] QuestionEditor.tsx [174 LOC, 1419 tokens]
 │   │   │   ├── [] FormPreview.tsx [82 LOC, 639 tokens]
 │   │   │   └── [] page.tsx [203 LOC, 1474 tokens]
@@ -160,11 +161,14 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   │   └── register/
 │   │   │       └── [] page.tsx [96 LOC, 778 tokens]
 │   │   ├── gigs/
-│   │   │   ├── [] useGigs.ts [177 LOC, 1305 tokens]
-│   │   │   ├── [] GigCard.tsx [109 LOC, 940 tokens]
-│   │   │   ├── [] types.ts [27 LOC, 171 tokens]
-│   │   │   ├── [] GigForm.tsx [185 LOC, 1590 tokens]
-│   │   │   └── [] page.tsx [168 LOC, 1210 tokens]
+│   │   │   ├── [] calculatePrice.ts [82 LOC, 520 tokens]
+│   │   │   ├── [] useGigs.ts [247 LOC, 1902 tokens]
+│   │   │   ├── [] GigCard.tsx [167 LOC, 1508 tokens]
+│   │   │   ├── [] types.ts [32 LOC, 200 tokens]
+│   │   │   ├── [] GigForm.tsx [366 LOC, 3060 tokens]
+│   │   │   ├── [] Addons.md [37 LOC, 395 tokens]
+│   │   │   ├── [] pricing.ts [18 LOC, 119 tokens]
+│   │   │   └── [] page.tsx [290 LOC, 2288 tokens]
 │   │   ├── chats/
 │   │   │   ├── [userId]/
 │   │   │   │   └── [] page.tsx [432 LOC, 4078 tokens]
@@ -199,7 +203,7 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   ├── [] NotificationContext.tsx [106 LOC, 745 tokens]
 │   │   ├── [] CartContext.tsx [78 LOC, 540 tokens]
 │   │   ├── [] SocketContext.tsx [64 LOC, 469 tokens]
-│   │   ├── [] AuthContext.tsx [106 LOC, 696 tokens]
+│   │   ├── [] AuthContext.tsx [110 LOC, 756 tokens]
 │   │   └── [] PostContext.tsx [131 LOC, 995 tokens]
 │   ├── cypress/
 │   │   ├── support/
@@ -226,8 +230,8 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   └── [] playwright.config.ts [45 LOC, 291 tokens]
 ├── [] package.json [8 LOC, 52 tokens]
 ├── [] cxt_switch.md [29 LOC, 372 tokens]
-├── [] agent_harness.md [54 LOC, 584 tokens]
-├── [] code_atlas.md [223 LOC, 3409 tokens]
+├── [] agent_harness.md [54 LOC, 614 tokens]
+├── [] code_atlas.md [238 LOC, 3711 tokens]
 ├── [] code_dump.txt [0 LOC, 0 tokens]
 ├── [] README.md [193 LOC, 1379 tokens]
 ├── [] project_tools.md [30 LOC, 1044 tokens]

@@ -2,10 +2,11 @@ const express = require('express');
 const db = require('../database');
 const { authenticateToken, optionalAuthenticateToken } = require('../middleware/auth');
 
-const router = express.Router();
+module.exports = (io, onlineUsers) => {
+  const router = express.Router();
 
-router.get('/', optionalAuthenticateToken, (req, res) => {
-  const { status, type, lat, lng, radius } = req.query;
+  router.get('/', optionalAuthenticateToken, (req, res) => {
+  const { status, type, vehicle_type, lat, lng, radius } = req.query;
   
   let query = `
     SELECT g.*, u.username as user_username,
@@ -25,9 +26,14 @@ router.get('/', optionalAuthenticateToken, (req, res) => {
     params.push('open');
   }
 
-  if (type) {
+  if (type && type !== 'all') {
     query += ' AND g.type = ?';
     params.push(type);
+  }
+
+  if (vehicle_type && vehicle_type !== 'all') {
+    query += ' AND g.vehicle_type = ?';
+    params.push(vehicle_type);
   }
 
   if (lat && lng && radius) {
@@ -101,8 +107,9 @@ router.get('/:id', optionalAuthenticateToken, (req, res) => {
 });
 
 router.post('/', authenticateToken, (req, res) => {
-  const { type, pickup_address, pickup_lat, pickup_lng, dropoff_address, dropoff_lat, dropoff_lng, details, price } = req.body;
+  const { type, vehicle_type, pickup_address, pickup_lat, pickup_lng, dropoff_address, dropoff_lat, dropoff_lng, distance, details, price } = req.body;
   const userId = req.user.id;
+  const payoutPrice = price * 0.8;
 
   if (!type || !pickup_address || !dropoff_address || !price) {
     return res.status(400).json({ error: 'Type, pickup address, dropoff address, and price are required' });
@@ -115,9 +122,9 @@ router.post('/', authenticateToken, (req, res) => {
   const detailsJson = details ? JSON.stringify(details) : null;
 
   db.run(`
-    INSERT INTO gigs (type, pickup_address, pickup_lat, pickup_lng, dropoff_address, dropoff_lat, dropoff_lng, details, price, user_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `, [type, pickup_address, pickup_lat || null, pickup_lng || null, dropoff_address, dropoff_lat || null, dropoff_lng || null, detailsJson, price, userId], function(err) {
+    INSERT INTO gigs (type, vehicle_type, pickup_address, pickup_lat, pickup_lng, dropoff_address, dropoff_lat, dropoff_lng, distance, details, price, payout_price, user_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `, [type, vehicle_type || null, pickup_address, pickup_lat || null, pickup_lng || null, dropoff_address, dropoff_lat || null, dropoff_lng || null, distance || null, detailsJson, price, payoutPrice, userId], function(err) {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
@@ -174,6 +181,62 @@ router.post('/:id/accept', authenticateToken, (req, res) => {
         if (updatedGig.details) {
           updatedGig.details = JSON.parse(updatedGig.details);
         }
+        
+        // Emit WebSocket event to notify poster and driver
+        if (io) {
+          io.emit('gigUpdated', updatedGig);
+        }
+        
+        res.json(updatedGig);
+      });
+    });
+  });
+});
+
+router.post('/:id/pay', authenticateToken, (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  db.get('SELECT * FROM gigs WHERE id = ?', [id], (err, gig) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    if (!gig) {
+      return res.status(404).json({ error: 'Gig not found' });
+    }
+    if (gig.status !== 'accepted' && gig.status !== 'completed') {
+      return res.status(400).json({ error: 'Gig must be accepted before payment' });
+    }
+    if (gig.user_id !== userId) {
+      return res.status(403).json({ error: 'Only the poster can make payment' });
+    }
+    if (gig.is_paid) {
+      return res.status(400).json({ error: 'Payment already made' });
+    }
+
+    db.run('UPDATE gigs SET is_paid = 1 WHERE id = ?', [id], function(err) {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      db.get(`
+        SELECT g.*, u.username as user_username,
+               driver.username as driver_username
+        FROM gigs g
+        JOIN users u ON g.user_id = u.id
+        LEFT JOIN users driver ON g.driver_id = driver.id
+        WHERE g.id = ?
+      `, [id], (err, updatedGig) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        if (updatedGig.details) {
+          updatedGig.details = JSON.parse(updatedGig.details);
+        }
+        
+        if (io) {
+          io.emit('gigUpdated', updatedGig);
+        }
+        
         res.json(updatedGig);
       });
     });
@@ -216,6 +279,11 @@ router.post('/:id/complete', authenticateToken, (req, res) => {
         if (updatedGig.details) {
           updatedGig.details = JSON.parse(updatedGig.details);
         }
+        
+        if (io) {
+          io.emit('gigUpdated', updatedGig);
+        }
+        
         res.json(updatedGig);
       });
     });
@@ -258,6 +326,11 @@ router.post('/:id/cancel', authenticateToken, (req, res) => {
         if (updatedGig.details) {
           updatedGig.details = JSON.parse(updatedGig.details);
         }
+        
+        if (io) {
+          io.emit('gigUpdated', updatedGig);
+        }
+        
         res.json(updatedGig);
       });
     });
@@ -280,7 +353,7 @@ router.post('/:id/reset', authenticateToken, (req, res) => {
       return res.status(404).json({ error: 'Gig not found' });
     }
 
-    db.run('UPDATE gigs SET status = ?, driver_id = NULL WHERE id = ?', ['open', id], function(err) {
+    db.run('UPDATE gigs SET status = ?, driver_id = NULL, is_paid = 0 WHERE id = ?', ['open', id], function(err) {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
@@ -298,6 +371,11 @@ router.post('/:id/reset', authenticateToken, (req, res) => {
         if (updatedGig.details) {
           updatedGig.details = JSON.parse(updatedGig.details);
         }
+        
+        if (io) {
+          io.emit('gigUpdated', updatedGig);
+        }
+        
         res.json(updatedGig);
       });
     });
@@ -329,4 +407,5 @@ router.delete('/:id', authenticateToken, (req, res) => {
   });
 });
 
-module.exports = router;
+  return router;
+};

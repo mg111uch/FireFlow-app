@@ -45,7 +45,7 @@ app.use('/api/markets', require('./routes/markets')(io, onlineUsers));
 app.use('/api/shops', require('./routes/shops'));
 app.use('/api/shop-products', require('./routes/shop-products'));
 app.use('/api/shop-orders', require('./routes/shop-orders'));
-app.use('/api/gigs', require('./routes/gigs'));
+app.use('/api/gigs', require('./routes/gigs')(io, onlineUsers));
 
 // Additional routes
 app.get('/api/search', (req, res) => {

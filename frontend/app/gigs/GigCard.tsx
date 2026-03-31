@@ -7,16 +7,20 @@ import { API_URL } from '@/lib/config';
 interface GigCardProps {
   gig: Gig;
   showActions?: boolean;
+  isAdmin?: boolean;
   onAccept?: (gigId: number) => void;
   onComplete?: (gigId: number) => void;
   onCancel?: (gigId: number) => void;
   onReset?: (gigId: number) => void;
   onDelete?: (gigId: number) => void;
+  onPay?: (gigId: number) => void;
 }
 
-export default function GigCard({ gig, showActions = false, onAccept, onComplete, onCancel, onReset, onDelete }: GigCardProps) {
+export default function GigCard({ gig, showActions = false, isAdmin = false, onAccept, onComplete, onCancel, onReset, onDelete, onPay }: GigCardProps) {
   const { currentUser } = useAuth();
-  const isAdmin = currentUser?.id === 1;
+
+  const isPoster = currentUser?.id === gig.user_id;
+  const isDriver = currentUser?.id === gig.driver_id;
 
   return (
     <div className="bg-gray-800 rounded-lg p-4 mb-3 shadow-md">
@@ -51,7 +55,45 @@ export default function GigCard({ gig, showActions = false, onAccept, onComplete
               )}
             </div>
           )}
-          <span className="text-lg font-bold text-green-400">₹{gig.price}</span>
+          {(() => {
+            if (isPoster && (gig.status === 'completed' || gig.status === 'accepted' || gig.status === 'open')) {
+              return (
+                <div className="text-right">
+                  <span className="text-xs text-gray-500 block">Your Price</span>
+                  <span className="text-lg font-bold text-green-400">₹{gig.price}</span>
+                  {(gig.status === 'accepted' || gig.status === 'completed') && (
+                    gig.is_paid === 1 ? (
+                      <span className="text-xs text-green-500 block">Paid</span>
+                    ) : (
+                      <span className="text-xs text-yellow-500 block">Unpaid</span>
+                    )
+                  )}
+                </div>
+              );
+            }
+            if (isDriver && (gig.status === 'completed' || gig.status === 'accepted')) {
+              return (
+                <div className="text-right">
+                  <span className="text-xs text-gray-500 block">Your Payout</span>
+                  <span className="text-lg font-bold text-green-400">₹{gig.payout_price}</span>
+                  {gig.is_paid === 1 ? (
+                    <span className="text-xs text-green-500 block">Paid</span>
+                  ) : (
+                    <span className="text-xs text-yellow-500 block">Unpaid</span>
+                  )}
+                </div>
+              );
+            }
+            if (gig.payout_price && gig.status === 'open') {
+              return (
+                <div className="text-right">
+                  <span className="text-xs text-gray-500 block">Payout</span>
+                  <span className="text-lg font-bold text-green-400">₹{gig.payout_price}</span>
+                </div>
+              );
+            }
+            return <span className="text-lg font-bold text-green-400">₹{gig.price}</span>;
+          })()}
         </div>
       </div>
       
@@ -86,7 +128,7 @@ export default function GigCard({ gig, showActions = false, onAccept, onComplete
               Accept
             </button>
           )}
-          {gig.status === 'accepted' && (gig.user_id === currentUser?.id || gig.driver_id === currentUser?.id) && (
+          {gig.status === 'accepted' && isDriver && gig.is_paid === 1 && (
             <button
               onClick={() => onComplete?.(gig.id)}
               className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm"
@@ -94,12 +136,28 @@ export default function GigCard({ gig, showActions = false, onAccept, onComplete
               Complete
             </button>
           )}
-          {(gig.status === 'open' || gig.status === 'accepted') && (
+          {gig.status === 'accepted' && isPoster && gig.is_paid !== 1 && (
+            <button
+              onClick={() => onPay?.(gig.id)}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm"
+            >
+              Pay
+            </button>
+          )}
+          {(gig.status === 'open' || (gig.status === 'accepted' && gig.is_paid !== 1)) && (
             <button
               onClick={() => onCancel?.(gig.id)}
               className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
             >
               Cancel
+            </button>
+          )}
+          {isPoster && gig.status === 'completed' && gig.is_paid !== 1 && (
+            <button
+              onClick={() => onPay?.(gig.id)}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded text-sm"
+            >
+              Pay
             </button>
           )}
         </div>

@@ -17,7 +17,6 @@ interface ServicePageProps {
 
 export default function ServicePage({ params }: ServicePageProps) {
   const router = useRouter();
-  // Unwrap params using React.use() for Next.js 15+ compatibility
   const { serviceName } = use(params);
   const service = getServiceBySlug(serviceName);
   const searchParams = useSearchParams();
@@ -25,23 +24,19 @@ export default function ServicePage({ params }: ServicePageProps) {
  
   const { initiatePayment, isLoading, error } = useRazorpayPayment();
 
-  // Show success toast when redirected back from /payment/callback
   useEffect(() => {
     if (searchParams.get('payment') === 'success') {
       setToast({ type: 'success', message: 'Payment successful! Your subscription is now active.' });
-      // Remove query param from URL without reloading
       window.history.replaceState({}, '', '/services');
     }
   }, [searchParams]);
  
-  // Show error toast if hook reports an error
   useEffect(() => {
     if (error) {
       setToast({ type: 'error', message: error });
     }
   }, [error]);
  
-  // Auto-dismiss toast after 4 seconds
   useEffect(() => {
     if (toast) {
       const timer = setTimeout(() => setToast(null), 4000);
@@ -54,7 +49,6 @@ export default function ServicePage({ params }: ServicePageProps) {
       amount: SUBSCRIPTION_AMOUNT,
       description: 'PostShare Subscription',
       onSuccess: (paymentId) => {
-        // This fires on desktop flow (non-redirect)
         setToast({ type: 'success', message: `Payment successful! ID: ${paymentId}` });
       },
       onFailure: (errMessage) => {
@@ -64,7 +58,6 @@ export default function ServicePage({ params }: ServicePageProps) {
   };
 
   const handleSubserviceClick = (subservice: Service['subservices'][0]) => {
-    // Navigate to the subservice page using the subservice name
     const slugName = encodeURIComponent(subservice.name.toLowerCase().replace(/\s+/g, '-'));
     router.push(`/services/${serviceName}/${slugName}`);
   };
@@ -81,7 +74,6 @@ export default function ServicePage({ params }: ServicePageProps) {
   return (
     <div className="container mx-auto p-2">
 
-      {/* Toast notification */}
       {toast && (
         <div
           className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-lg shadow-lg text-sm font-medium text-white transition-all
@@ -114,7 +106,6 @@ export default function ServicePage({ params }: ServicePageProps) {
         </div>
       )}
 
-      {/* Subscribe CTA */}
       <div className="mt-6 flex flex-col items-center gap-3">
         <button
           onClick={handleSubscribe}

@@ -12,22 +12,16 @@ import QuestionEditor from './QuestionEditor';
 import FormPreview from './FormPreview';
 import { API_URL } from '@/lib/config';
 
-// Define admin user IDs who can create service forms
-const ADMIN_USER_IDS = [1]; // Add admin user IDs here
-
 export default function CreateServicePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { currentUser } = useAuth();
+  const { currentUser, isAdmin } = useAuth();
   const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formPrice, setFormPrice] = useState(0);
   const [questions, setQuestions] = useState<FormQuestion[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  
-  // Check if current user is admin
-  const isAdmin = currentUser && ADMIN_USER_IDS.includes(currentUser.id);
   
   // Form type selection: 'general' or 'service' (only shown for admins)
   const [formType, setFormType] = useState<'general' | 'service'>('general');

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { HomeIcon, ChatsIcon, SearchIcon, ServicesIcon, ProfileIcon } from '../lib/icons';
 
 // Define main tab routes
-const MAIN_TABS = ['/', '/chats', '/shop', '/services', '/profile'];
+const MAIN_TABS = ['/', '/chats', '/services', '/shop', '/profile'];
 
 export default function BottomAppBar() {
   const pathname = usePathname(); // Get the current path
@@ -29,9 +29,9 @@ export default function BottomAppBar() {
           <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
         </span>
       </>
-    )},    
-    { href: '/shop', label: 'Showcase', icon: <SearchIcon className="size-6" />},
+    )},        
     { href: '/services', label: 'Services', icon: <ServicesIcon className="size-6" />},
+    { href: '/shop', label: 'Showcase', icon: <SearchIcon className="size-6" />},
     { href: '/profile', label: 'Profile', icon: <ProfileIcon className="size-6" />},
   ];
 
