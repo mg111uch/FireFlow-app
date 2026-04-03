@@ -5,6 +5,7 @@ import { GigDetails } from './types';
 import { useAuth } from '@/context/AuthContext';
 import Tabs from '@/components/ui/Tabs';
 import { calculatePrice } from './calculatePrice';
+import LocationPickerModal from './LocationPickerModal';
 
 interface SavedAddress {
   id: string;
@@ -13,7 +14,7 @@ interface SavedAddress {
 }
 
 interface GigFormProps {
-  onSubmit: (data: { type: 'ride' | 'delivery'; vehicle_type?: string; pickup_address: string; dropoff_address: string; distance?: string; price: number; details: GigDetails }) => void;
+  onSubmit: (data: { type: 'ride' | 'delivery'; vehicle_type?: string; pickup_address: string; pickup_lat?: number | null; pickup_lng?: number | null; dropoff_address: string; dropoff_lat?: number | null; dropoff_lng?: number | null; distance?: string; price: number; details: GigDetails }) => void;
   submitting: boolean;
   isAdmin?: boolean;
 }
@@ -36,9 +37,11 @@ interface AddressFieldProps {
   isPickup: boolean;
   savedAddresses: SavedAddress[];
   onSelectAddress: (address: string, isPickup: boolean) => void;
+  onMapClick?: () => void;
+  coords?: { lat: number; lng: number } | null;
 }
 
-function AddressField({ label, value, onChange, showDropdown, setShowDropdown, saveChecked, setSaveChecked, isPickup, savedAddresses, onSelectAddress }: AddressFieldProps) {
+function AddressField({ label, value, onChange, showDropdown, setShowDropdown, saveChecked, setSaveChecked, isPickup, savedAddresses, onSelectAddress, onMapClick, coords }: AddressFieldProps) {
   return (
     <div className="mb-4">
       <label className="block text-gray-300 text-sm font-bold mb-2">{label}</label>
@@ -49,7 +52,6 @@ function AddressField({ label, value, onChange, showDropdown, setShowDropdown, s
             value={value}
             onChange={(e) => onChange(e.target.value)}
             className="flex-1 px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500"
-            required
           />
           {savedAddresses.length > 0 && (
             <button
@@ -61,6 +63,14 @@ function AddressField({ label, value, onChange, showDropdown, setShowDropdown, s
               ▼
             </button>
           )}
+          <button
+            type="button"
+            onClick={onMapClick}
+            className="px-3 py-2 bg-green-700 text-white border border-l-0 border-gray-600 hover:bg-green-600 rounded-r"
+            title="Select from map"
+          >
+            📍
+          </button>
         </div>
         {showDropdown && savedAddresses.length > 0 && (
           <div className="absolute z-10 w-full mt-1 bg-gray-700 rounded border border-gray-600 max-h-40 overflow-y-auto">
@@ -80,6 +90,11 @@ function AddressField({ label, value, onChange, showDropdown, setShowDropdown, s
           </div>
         )}
       </div>
+      {coords && (
+        <p className="text-xs text-gray-500 mt-1">
+          📍 {coords.lat.toFixed(5)}, {coords.lng.toFixed(5)}
+        </p>
+      )}
       <label className="flex items-center mt-2">
         <input
           type="checkbox"
@@ -112,9 +127,26 @@ export default function GigForm({ onSubmit, submitting, isAdmin = false }: GigFo
     packageDescription: '',
     weight: '',
     fragile: false,
+    receiverName: '',
+    receiverContact: '',
   });
   const [savePickup, setSavePickup] = useState(false);
   const [saveDropoff, setSaveDropoff] = useState(false);
+  const [showPickupMap, setShowPickupMap] = useState(false);
+  const [showDropoffMap, setShowDropoffMap] = useState(false);
+  const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [dropoffCoords, setDropoffCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
 
   const calculatedPrice = useMemo(() => {
     const distance = isUserAdmin ? parseFloat(formData.distance) : 8;
@@ -140,6 +172,13 @@ export default function GigForm({ onSubmit, submitting, isAdmin = false }: GigFo
       vehicle_type: prev.type === 'ride' ? 'Bike-Taxi' : 'Bike',
     }));
   }, [formData.type]);
+
+  useEffect(() => {
+    if (pickupCoords && dropoffCoords) {
+      const dist = calculateDistance(pickupCoords.lat, pickupCoords.lng, dropoffCoords.lat, dropoffCoords.lng);
+      setFormData(prev => ({ ...prev, distance: dist.toFixed(1) }));
+    }
+  }, [pickupCoords, dropoffCoords]);
 
   const saveAddressToStorage = (address: string, isPickup: boolean) => {
     const existing = savedAddresses.find(a => a.address.toLowerCase() === address.toLowerCase());
@@ -168,6 +207,10 @@ export default function GigForm({ onSubmit, submitting, isAdmin = false }: GigFo
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!formData.pickup_address.trim() || !formData.dropoff_address.trim()) {
+      return;
+    }
+
     if (savePickup && formData.pickup_address.trim()) {
       saveAddressToStorage(formData.pickup_address.trim(), true);
     }
@@ -184,13 +227,19 @@ export default function GigForm({ onSubmit, submitting, isAdmin = false }: GigFo
       details.packageDescription = formData.packageDescription;
       details.weight = formData.weight;
       details.fragile = formData.fragile;
+      details.receiverName = formData.receiverName;
+      details.receiverContact = formData.receiverContact;
     }
 
     onSubmit({
       type: formData.type,
       vehicle_type: formData.vehicle_type,
       pickup_address: formData.pickup_address,
+      pickup_lat: pickupCoords?.lat ?? null,
+      pickup_lng: pickupCoords?.lng ?? null,
       dropoff_address: formData.dropoff_address,
+      dropoff_lat: dropoffCoords?.lat ?? null,
+      dropoff_lng: dropoffCoords?.lng ?? null,
       distance: isUserAdmin ? formData.distance : '8',
       price: calculatedPrice,
       details,
@@ -198,7 +247,7 @@ export default function GigForm({ onSubmit, submitting, isAdmin = false }: GigFo
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg p-4">
+    <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg p-4" noValidate>
       <div className="mb-4">
         <Tabs
           key="type-tabs"
@@ -219,6 +268,8 @@ export default function GigForm({ onSubmit, submitting, isAdmin = false }: GigFo
         isPickup={true}
         savedAddresses={savedAddresses}
         onSelectAddress={selectSavedAddress}
+        onMapClick={() => setShowPickupMap(true)}
+        coords={pickupCoords}
       />
 
       <AddressField
@@ -232,6 +283,8 @@ export default function GigForm({ onSubmit, submitting, isAdmin = false }: GigFo
         isPickup={false}
         savedAddresses={savedAddresses}
         onSelectAddress={selectSavedAddress}
+        onMapClick={() => setShowDropoffMap(true)}
+        coords={dropoffCoords}
       />
 
       <div className="mb-4">
@@ -339,6 +392,24 @@ export default function GigForm({ onSubmit, submitting, isAdmin = false }: GigFo
               <span className="text-gray-300">Fragile</span>
             </label>
           </div>
+          <div className="mb-4">
+            <label className="block text-gray-300 text-sm font-bold mb-2">Receiver Name</label>
+            <input
+              type="text"
+              value={formData.receiverName}
+              onChange={(e) => setFormData({ ...formData, receiverName: e.target.value })}
+              className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-300 text-sm font-bold mb-2">Receiver Contact</label>
+            <input
+              type="text"
+              value={formData.receiverContact}
+              onChange={(e) => setFormData({ ...formData, receiverContact: e.target.value })}
+              className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:outline-none focus:border-blue-500"
+            />
+          </div>
         </>
       )}
 
@@ -361,6 +432,26 @@ export default function GigForm({ onSubmit, submitting, isAdmin = false }: GigFo
       >
         {submitting ? 'Creating...' : 'Post Gig'}
       </button>
+
+      <LocationPickerModal
+        isOpen={showPickupMap}
+        onClose={() => setShowPickupMap(false)}
+        onSelect={(location) => {
+          setFormData(prev => ({ ...prev, pickup_address: location.address }));
+          setPickupCoords({ lat: location.lat, lng: location.lng });
+        }}
+        initialLocation={pickupCoords}
+      />
+
+      <LocationPickerModal
+        isOpen={showDropoffMap}
+        onClose={() => setShowDropoffMap(false)}
+        onSelect={(location) => {
+          setFormData(prev => ({ ...prev, dropoff_address: location.address }));
+          setDropoffCoords({ lat: location.lat, lng: location.lng });
+        }}
+        initialLocation={dropoffCoords}
+      />
     </form>
   );
 }

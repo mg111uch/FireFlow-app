@@ -16,7 +16,7 @@ interface UseGigsReturn {
   myGigs: Gig[];
   loading: boolean;
   error: string | null;
-  fetchAvailableGigs: (filters?: { type?: string; vehicle_type?: string }) => Promise<void>;
+  fetchAvailableGigs: (filters?: { type?: string; vehicle_type?: string; lat?: number; lng?: number; radius?: number }) => Promise<void>;
   fetchMyGigs: () => Promise<void>;
   acceptGig: (gigId: number) => Promise<void>;
   completeGig: (gigId: number) => Promise<void>;
@@ -75,7 +75,7 @@ export function useGigs(token: string | null, socket?: Socket | null, currentUse
     };
   }, [socket]);
 
-  const fetchAvailableGigs = useCallback(async (filters?: { type?: string; vehicle_type?: string }) => {
+  const fetchAvailableGigs = useCallback(async (filters?: { type?: string; vehicle_type?: string; lat?: number; lng?: number; radius?: number }) => {
     if (!token) return;
     setLoading(true);
     setError(null);
@@ -83,6 +83,9 @@ export function useGigs(token: string | null, socket?: Socket | null, currentUse
       const params = new URLSearchParams({ status: 'open' });
       if (filters?.type && filters.type !== 'all') params.append('type', filters.type);
       if (filters?.vehicle_type && filters.vehicle_type !== 'all') params.append('vehicle_type', filters.vehicle_type);
+      if (filters?.lat) params.append('lat', filters.lat.toString());
+      if (filters?.lng) params.append('lng', filters.lng.toString());
+      if (filters?.radius) params.append('radius', filters.radius.toString());
       
       const res = await fetch(`${API_URL}/api/gigs?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },

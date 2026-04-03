@@ -8,6 +8,7 @@ import Tabs from '@/components/ui/Tabs';
 import GigCard from './GigCard';
 import GigForm from './GigForm';
 import { useGigs } from './useGigs';
+import MapView from './MapView';
 
 export default function GigsPage() {
   const { isAuthenticated, isAdmin, token, currentUser } = useAuth();
@@ -18,6 +19,11 @@ export default function GigsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [typeFilter, setTypeFilter] = useState('all');
   const [vehicleFilter, setVehicleFilter] = useState('all');
+  const [radiusFilter, setRadiusFilter] = useState(0);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [showMap, setShowMap] = useState(false);
+  const [clickedLocation, setClickedLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const {
@@ -43,6 +49,21 @@ export default function GigsPage() {
       setTypeFilter(type || 'all');
       setVehicleFilter(vehicle || 'all');
     }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          setLocationError('Unable to get location. Location-based filtering disabled.');
+        },
+        { timeout: 15000 }
+      );
+    }
   }, []);
 
   const myGigsSubTabs = [
@@ -64,7 +85,7 @@ export default function GigsPage() {
         spending += gig.price;
       }
       if (gig.driver_id === userId) {
-        earnings += gig.payout_price || gig.price;
+        earnings += Number(gig.payout_price) || gig.price;
       }
     }
     
@@ -80,11 +101,17 @@ export default function GigsPage() {
 
   useEffect(() => {
     if (activeTab === 'available') {
-      fetchAvailableGigs({ type: typeFilter, vehicle_type: vehicleFilter });
+      fetchAvailableGigs({ 
+        type: typeFilter, 
+        vehicle_type: vehicleFilter,
+        lat: userLocation?.lat,
+        lng: userLocation?.lng,
+        radius: radiusFilter > 0 ? radiusFilter : undefined,
+      });
     } else if (activeTab === 'my') {
       fetchMyGigs();
     }
-  }, [activeTab, typeFilter, vehicleFilter]);
+  }, [activeTab, typeFilter, vehicleFilter, radiusFilter, userLocation]);
 
   const handleFilterChange = (newType: string, newVehicle: string) => {
     setTypeFilter(newType);
@@ -118,7 +145,13 @@ export default function GigsPage() {
   const handleReset = async (gigId: number) => {
     setActiveTab('available');
     await resetGig(gigId);
-    fetchAvailableGigs({ type: typeFilter, vehicle_type: vehicleFilter });
+    fetchAvailableGigs({ 
+      type: typeFilter, 
+      vehicle_type: vehicleFilter,
+      lat: userLocation?.lat,
+      lng: userLocation?.lng,
+      radius: radiusFilter > 0 ? radiusFilter : undefined,
+    });
   };
 
   const handleSubmit = async (data: Parameters<typeof createGig>[0]) => {
@@ -149,6 +182,9 @@ export default function GigsPage() {
 
       {activeTab === 'available' && (
         <div>
+          {locationError && (
+            <div className="mb-4 p-2 bg-yellow-600 text-white rounded text-sm">{locationError}</div>
+          )}
           <div className="mb-4 p-4 bg-gray-800 rounded-lg">
             <div className="flex flex-wrap gap-4 items-end">
               <div className="flex-1 min-w-[150px]">
@@ -174,6 +210,23 @@ export default function GigsPage() {
                   {getVehicleOptions(typeFilter).map(v => (
                     <option key={v} value={v}>{v}</option>
                   ))}
+                </select>
+              </div>
+              <div className="flex-1 min-w-[150px]">
+                <label className="block text-gray-400 text-sm mb-1">Radius (km)</label>
+                <select
+                  value={radiusFilter}
+                  onChange={(e) => setRadiusFilter(Number(e.target.value))}
+                  className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600"
+                  disabled={!userLocation}
+                >
+                  <option value={0}>All Locations</option>
+                  <option value={1}>1 km</option>
+                  <option value={2}>2 km</option>
+                  <option value={5}>5 km</option>
+                  <option value={10}>10 km</option>
+                  <option value={20}>20 km</option>
+                  <option value={50}>50 km</option>
                 </select>
               </div>
               <div className="flex gap-2">
@@ -239,6 +292,42 @@ export default function GigsPage() {
 
           {myGigsTab === 'open' && (
             <div>
+              {userLocation && (
+                <div className="mb-4 flex items-center gap-2">
+                  <div className="flex-1 p-2 bg-blue-900 border border-blue-600 rounded">
+                    <label className="block text-gray-400 text-xs mb-1">Your Coordinates</label>
+                    <input
+                      type="text"
+                      readOnly
+                      value={`${userLocation.lat.toFixed(6)}, ${userLocation.lng.toFixed(6)}`}
+                      className="w-full px-2 py-1 bg-gray-800 text-green-400 text-sm font-mono rounded"
+                    />
+                  </div>
+                  <button
+                    onClick={() => setShowMap(!showMap)}
+                    className="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded text-sm h-full"
+                    disabled={!userLocation}
+                  >
+                    {showMap ? 'Hide Map' : 'Show Map'}
+                  </button>
+                </div>
+              )}
+              {showMap && userLocation && (
+                <div className="mb-4">
+                  <MapView key={activeTab} gigs={openGigs} userLocation={userLocation} radius={radiusFilter} onMapClick={(lat, lng) => setClickedLocation({ lat, lng })} />
+                </div>
+              )}
+              {isAdmin && userLocation && showMap && clickedLocation && (
+                <div className="mb-4 p-2 bg-blue-900 border border-blue-600 rounded">
+                  <label className="block text-gray-400 text-xs mb-1">Clicked Location</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value={`${clickedLocation.lat.toFixed(6)}, ${clickedLocation.lng.toFixed(6)}`}
+                    className="w-full px-2 py-1 bg-gray-800 text-yellow-400 text-sm font-mono rounded"
+                  />
+                </div>
+              )}
               {openGigs.length === 0 ? (
                 <p className="text-center text-gray-400 mt-4">No open gigs</p>
               ) : (

@@ -23,6 +23,7 @@ export default function Tabs({ tabs, activeTab, onChange }: TabsProps) {
       {tabs.map((tab) => (
         <button
           key={tab.value}
+          type="button"
           className={`w-1/2 py-2 px-4 text-lg font-semibold ${
             activeTab === tab.value 
               ? 'border-b-2 border-blue-500 text-blue-500' 

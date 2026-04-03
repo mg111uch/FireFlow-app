@@ -3,7 +3,7 @@
 
 ## TASK
 
-What changes are needed in `React/reddit-clone/frontend/app/gigs/page.tsx` so that Dashboard shows two types of totals, one for total spending which totals poster's paid amount for all completed gigs as a poster, and another for total earnings which totals driver's payout amount for all completed gigs as a driver.
+Find reason why in `React/reddit-clone/frontend/app/gigs/GigForm.tsx` submitting form does not insert pickup and dropoff latitude and longitude in backend databse.
 Do not give code, just a concise plan or answer.
 
 ## Code Execution & Validation Environment

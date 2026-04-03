@@ -60,7 +60,7 @@ export default function GigCard({ gig, showActions = false, isAdmin = false, onA
               return (
                 <div className="text-right">
                   <span className="text-xs text-gray-500 block">Your Price</span>
-                  <span className="text-lg font-bold text-green-400">₹{gig.price}</span>
+                  <span className="text-lg font-bold text-green-400">₹{(gig.price).toFixed(2)}</span>
                   {(gig.status === 'accepted' || gig.status === 'completed') && (
                     gig.is_paid === 1 ? (
                       <span className="text-xs text-green-500 block">Paid</span>
@@ -74,8 +74,16 @@ export default function GigCard({ gig, showActions = false, isAdmin = false, onA
             if (isDriver && (gig.status === 'completed' || gig.status === 'accepted')) {
               return (
                 <div className="text-right">
-                  <span className="text-xs text-gray-500 block">Your Payout</span>
-                  <span className="text-lg font-bold text-green-400">₹{gig.payout_price}</span>
+                  <div className="flex gap-3 justify-end">
+                    <div>
+                      <span className="text-xs text-gray-500 block">User pays</span>
+                      <span className="text-lg font-bold text-blue-400">₹{Number(gig.price).toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span className="text-xs text-gray-500 block">Your Payout</span>
+                      <span className="text-lg font-bold text-green-400">₹{Number(gig.payout_price).toFixed(2)}</span>
+                    </div>
+                  </div>
                   {gig.is_paid === 1 ? (
                     <span className="text-xs text-green-500 block">Paid</span>
                   ) : (
@@ -88,7 +96,7 @@ export default function GigCard({ gig, showActions = false, isAdmin = false, onA
               return (
                 <div className="text-right">
                   <span className="text-xs text-gray-500 block">Payout</span>
-                  <span className="text-lg font-bold text-green-400">₹{gig.payout_price}</span>
+                  <span className="text-lg font-bold text-green-400">₹{Number(gig.payout_price).toFixed(2)}</span>
                 </div>
               );
             }
@@ -98,8 +106,8 @@ export default function GigCard({ gig, showActions = false, isAdmin = false, onA
       </div>
       
       <div className="mb-2">
-        <p className="text-gray-300 text-sm"><span className="text-gray-500">From:</span> {gig.pickup_address}</p>
-        <p className="text-gray-300 text-sm"><span className="text-gray-500">To:</span> {gig.dropoff_address}</p>
+        <p className="text-gray-300 text-sm"><span className="text-gray-500">Pick-up:</span> {gig.pickup_address}</p>
+        <p className="text-gray-300 text-sm"><span className="text-gray-500">Drop-off:</span> {gig.dropoff_address}</p>
       </div>
 
       {gig.details && (
@@ -107,8 +115,26 @@ export default function GigCard({ gig, showActions = false, isAdmin = false, onA
           {gig.type === 'ride' && gig.details.passengers && (
             <p>{gig.details.passengers} passenger(s)</p>
           )}
+          {gig.type === 'ride' && gig.details.passengerName && (
+            <p>Passenger: {gig.details.passengerName}</p>
+          )}
+          {gig.type === 'ride' && gig.details.passengerContact && (
+            <p>Contact: {gig.details.passengerContact}</p>
+          )}
           {gig.type === 'delivery' && gig.details.packageDescription && (
             <p>{gig.details.packageDescription}</p>
+          )}
+          {gig.type === 'delivery' && gig.details.weight && (
+            <p>Weight: {gig.details.weight}</p>
+          )}
+          {gig.type === 'delivery' && gig.details.fragile && (
+            <p>Fragile: Yes</p>
+          )}
+          {gig.type === 'delivery' && gig.details.receiverName && (
+            <p>Receiver: {gig.details.receiverName}</p>
+          )}
+          {gig.type === 'delivery' && gig.details.receiverContact && (
+            <p>Contact: {gig.details.receiverContact}</p>
           )}
         </div>
       )}

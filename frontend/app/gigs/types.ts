@@ -6,6 +6,8 @@ export interface GigDetails {
   weight?: string;
   fragile?: boolean;
   vehicle_type?: string;
+  receiverName?: string;
+  receiverContact?: string;
 }
 
 export interface Gig {

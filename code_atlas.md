@@ -8,9 +8,9 @@
 Legend: │=sep ►=internal ●=external ⚡=entry 🔴=HIGH 🟡=MED 🟢=LOW ⚪=SAFE
 
 ## Codebase size
-Total files processed: 143
-Total lines of code: 15945
-Total tokens: 148183
+Total files processed: 145
+Total lines of code: 16418
+Total tokens: 152870
 ## End Codebase size
 
 Entries: F005
@@ -57,7 +57,7 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   ├── [] forms.js [580 LOC, 4769 tokens]
 │   │   ├── [] agent.js [124 LOC, 924 tokens]
 │   │   ├── [] users.js [260 LOC, 2089 tokens]
-│   │   ├── [] gigs.js [411 LOC, 3279 tokens]
+│   │   ├── [] gigs.js [411 LOC, 3288 tokens]
 │   │   ├── [] auth.js [110 LOC, 1038 tokens]
 │   │   ├── [] markets.js [150 LOC, 1367 tokens]
 │   │   ├── [] flowpay.js [154 LOC, 1131 tokens]
@@ -161,14 +161,16 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   │   └── register/
 │   │   │       └── [] page.tsx [96 LOC, 778 tokens]
 │   │   ├── gigs/
-│   │   │   ├── [] calculatePrice.ts [82 LOC, 520 tokens]
-│   │   │   ├── [] useGigs.ts [247 LOC, 1902 tokens]
-│   │   │   ├── [] GigCard.tsx [167 LOC, 1508 tokens]
-│   │   │   ├── [] types.ts [32 LOC, 200 tokens]
-│   │   │   ├── [] GigForm.tsx [366 LOC, 3060 tokens]
-│   │   │   ├── [] Addons.md [37 LOC, 395 tokens]
-│   │   │   ├── [] pricing.ts [18 LOC, 119 tokens]
-│   │   │   └── [] page.tsx [290 LOC, 2288 tokens]
+│   │   │   ├── [] calculatePrice.ts [88 LOC, 581 tokens]
+│   │   │   ├── [] useGigs.ts [250 LOC, 1974 tokens]
+│   │   │   ├── [] MapView.tsx [71 LOC, 703 tokens]
+│   │   │   ├── [] LocationPickerModal.tsx [159 LOC, 1277 tokens]
+│   │   │   ├── [] GigCard.tsx [193 LOC, 1798 tokens]
+│   │   │   ├── [] types.ts [34 LOC, 212 tokens]
+│   │   │   ├── [] GigForm.tsx [457 LOC, 4069 tokens]
+│   │   │   ├── [] Addons.md [27 LOC, 272 tokens]
+│   │   │   ├── [] page.tsx [379 LOC, 3157 tokens]
+│   │   │   └── [] InteractiveMap.tsx [76 LOC, 499 tokens]
 │   │   ├── chats/
 │   │   │   ├── [userId]/
 │   │   │   │   └── [] page.tsx [432 LOC, 4078 tokens]
@@ -189,7 +191,7 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   ├── ui/
 │   │   │   ├── [] OptionsDrawer.tsx [128 LOC, 805 tokens]
 │   │   │   ├── [] Snackbar.tsx [31 LOC, 195 tokens]
-│   │   │   └── [] Tabs.tsx [44 LOC, 255 tokens]
+│   │   │   └── [] Tabs.tsx [45 LOC, 260 tokens]
 │   │   ├── [] FormCard.tsx [85 LOC, 613 tokens]
 │   │   ├── [] TopAppBar.tsx [68 LOC, 612 tokens]
 │   │   ├── [] PostCard.tsx [374 LOC, 2823 tokens]
@@ -230,8 +232,8 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   └── [] playwright.config.ts [45 LOC, 291 tokens]
 ├── [] package.json [8 LOC, 52 tokens]
 ├── [] cxt_switch.md [29 LOC, 372 tokens]
-├── [] agent_harness.md [54 LOC, 614 tokens]
-├── [] code_atlas.md [238 LOC, 3711 tokens]
+├── [] agent_harness.md [54 LOC, 586 tokens]
+├── [] code_atlas.md [239 LOC, 3731 tokens]
 ├── [] code_dump.txt [0 LOC, 0 tokens]
 ├── [] README.md [193 LOC, 1379 tokens]
 ├── [] project_tools.md [30 LOC, 1044 tokens]

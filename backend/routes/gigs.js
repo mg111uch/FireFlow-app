@@ -109,7 +109,7 @@ router.get('/:id', optionalAuthenticateToken, (req, res) => {
 router.post('/', authenticateToken, (req, res) => {
   const { type, vehicle_type, pickup_address, pickup_lat, pickup_lng, dropoff_address, dropoff_lat, dropoff_lng, distance, details, price } = req.body;
   const userId = req.user.id;
-  const payoutPrice = price * 0.8;
+  const payoutPrice = Math.round(price * 0.8 * 100) / 100;
 
   if (!type || !pickup_address || !dropoff_address || !price) {
     return res.status(400).json({ error: 'Type, pickup address, dropoff address, and price are required' });
