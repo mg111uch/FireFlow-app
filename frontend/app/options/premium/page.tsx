@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { APP_NAME } from '@/lib/config';
-import FlowpayModal from '@/components/FlowpayModal';
+import { usePayment } from '@/hooks/usePayment';
 
 interface Plan {
   id: string;
@@ -43,39 +42,46 @@ const plans: Plan[] = [
 ];
 
 export default function PremiumPage() {
-  const router = useRouter();
-  const [showPayment, setShowPayment] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const { openPayment, isLoading, GatewayModal, FlowPayModal } = usePayment();
 
-  const handleSubscribe = (planId: string) => {
-    const plan = plans.find(p => p.id === planId);
-    if (!plan) return;
-    setSelectedPlan(plan);
-    setShowPayment(true);
+  const showToast = (type: 'success' | 'error', message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 4000);
   };
 
-  const handlePaymentSuccess = (paymentId: string) => {
-    console.log('Payment successful:', paymentId);
-    setShowPayment(false);
-    alert('Payment successful! Your premium is now active.');
-  };
-
-  const handlePaymentFailure = (error: string) => {
-    console.error('Payment failed:', error);
-    setShowPayment(false);
+  const handleSubscribe = (plan: Plan) => {
+    openPayment({
+      amount: plan.price,
+      description: `${plan.name} Subscription`,
+      onSuccess: (paymentId) => {
+        showToast('success', `Payment successful! Your premium is now active. ID: ${paymentId}`);
+      },
+      onFailure: (error) => {
+        showToast('error', error);
+      },
+    });
   };
 
   return (
     <div className="container mx-auto p-2">
+      {/* Modals */}
+      {GatewayModal}
+      {FlowPayModal}
 
       <div className="text-center mb-4">
         <h1 className="text-3xl font-bold mb-2">Upgrade to Premium</h1>
-        <p className="text-gray-400">Unlock exclusive features and enhance your {APP_NAME} experience</p>
+        <p className="text-gray-400">
+          Unlock exclusive features and enhance your {APP_NAME} experience
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl mx-auto p-2">
         {plans.map((plan) => (
-          <div key={plan.id} className="bg-gray-900 border border-yellow-500/30 rounded-lg p-6 hover:border-yellow-500 transition-colors">
+          <div
+            key={plan.id}
+            className="bg-gray-900 border border-yellow-500/30 rounded-lg p-6 hover:border-yellow-500 transition-colors"
+          >
             <h2 className="text-xl font-bold text-yellow-500 mb-2">{plan.name}</h2>
             <div className="mb-4">
               <span className="text-3xl font-bold">₹ {plan.price}</span>
@@ -90,8 +96,9 @@ export default function PremiumPage() {
               ))}
             </ul>
             <button
-              onClick={() => handleSubscribe(plan.id)}
-              className="w-full bg-yellow-500 text-black font-semibold py-3 rounded-md hover:bg-yellow-400 transition-colors"
+              onClick={() => handleSubscribe(plan)}
+              disabled={isLoading}
+              className="w-full bg-yellow-500 text-black font-semibold py-3 rounded-md hover:bg-yellow-400 transition-colors disabled:opacity-60"
             >
               Subscribe for ₹ {plan.price}
             </button>
@@ -99,20 +106,17 @@ export default function PremiumPage() {
         ))}
       </div>
 
-      {selectedPlan && (
-        <FlowpayModal
-          isOpen={showPayment}
-          amount={selectedPlan.price}
-          description={`${selectedPlan.name} Subscription`}
-          onSuccess={handlePaymentSuccess}
-          onFailure={handlePaymentFailure}
-          onClose={() => setShowPayment(false)}
-        />
-      )}
+      <p className="text-center text-gray-500 text-sm mt-8">Cancel anytime. No questions asked.</p>
 
-      <p className="text-center text-gray-500 text-sm mt-8">
-        Cancel anytime. No questions asked.
-      </p>
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-lg shadow-lg text-sm font-medium text-white transition-all ${
+            toast.type === 'success' ? 'bg-green-600' : 'bg-red-500'
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }

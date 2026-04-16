@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { API_URL, APP_URL } from '@/lib/config';
@@ -10,6 +10,7 @@ interface PaymentModalProps {
   amount: number;
   description: string;
   orderId?: string;
+  returnUrl?: string;
   onSuccess: (paymentId: string) => void;
   onFailure: (error: string) => void;
   onClose: () => void;
@@ -20,6 +21,7 @@ export default function PaymentModal({
   amount,
   description,
   orderId: initialOrderId,
+  returnUrl,
   onSuccess,
   onFailure,
   onClose,
@@ -27,16 +29,16 @@ export default function PaymentModal({
   const router = useRouter();
   
   const [orderId, setOrderId] = useState(initialOrderId || '');
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvv, setCvv] = useState('');
-  const [name, setName] = useState('');
+  const [upiId, setUpiId] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const orderCreatedRef = useRef(false);
+  const latestOrderIdRef = useRef('');
 
   useEffect(() => {
-    if (isOpen && !orderId) {
+    if (isOpen && !orderCreatedRef.current) {
+      orderCreatedRef.current = true;
       createOrder();
     }
   }, [isOpen]);
@@ -47,10 +49,11 @@ export default function PaymentModal({
       const token = localStorage.getItem('token');
       const { data } = await axios.post(
         `${API_URL}/api/payments/create-order`,
-        { amount },
+        { amount, gateway: 'flowpay' },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setOrderId(data.orderId);
+      latestOrderIdRef.current = data.order_id;
+      setOrderId(data.order_id);
     } catch (err: any) {
       const message = err?.response?.data?.error || 'Failed to create order';
       setError(message);
@@ -58,19 +61,6 @@ export default function PaymentModal({
     } finally {
       setLoading(false);
     }
-  };
-
-  const formatCardNumber = (value: string) => {
-    const digits = value.replace(/\D/g, '').slice(0, 16);
-    return digits.replace(/(\d{4})(?=\d)/g, '$1 ');
-  };
-
-  const formatExpiry = (value: string) => {
-    const digits = value.replace(/\D/g, '').slice(0, 4);
-    if (digits.length >= 2) {
-      return digits.slice(0, 2) + '/' + digits.slice(2);
-    }
-    return digits;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,22 +72,20 @@ export default function PaymentModal({
       const token = localStorage.getItem('token');
       
       const response = await axios.post(
-        `${API_URL}/api/flowpay/process`,
-        {
-          orderId,
-          cardNumber: cardNumber.replace(/\s/g, ''),
-          expiry,
-          cvv,
-          name,
-        },
+        `${API_URL}/api/payments/process`,
+        { order_id: latestOrderIdRef.current },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const { flowpay_payment_id, flowpay_signature } = response.data;
+      console.log("ORDER USED:", latestOrderIdRef.current);
 
-      const callbackUrl = `${APP_URL}/payment/callback?razorpay_payment_id=${flowpay_payment_id}&razorpay_order_id=${orderId}&razorpay_signature=${flowpay_signature}`;
-      
-      window.location.href = callbackUrl;
+      const { payment_id, signature } = response.data;
+
+      let redirectUrl = `${APP_URL}/payment/callback?payment_id=${payment_id}&order_id=${latestOrderIdRef.current}&signature=${signature}`;
+      if (returnUrl) {
+        redirectUrl += `&returnUrl=${encodeURIComponent(returnUrl)}`;
+      }
+      window.location.href = redirectUrl;
 
     } catch (err: any) {
       const message = err?.response?.data?.error || 'Payment failed. Please try again.';
@@ -108,10 +96,8 @@ export default function PaymentModal({
   };
 
   const handleClose = () => {
-    setCardNumber('');
-    setExpiry('');
-    setCvv('');
-    setName('');
+    orderCreatedRef.current = false;
+    setUpiId('');
     setError('');
     setOrderId('');
     onClose();
@@ -149,49 +135,12 @@ export default function PaymentModal({
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-gray-400 text-sm mb-1">Card Number</label>
+                <label className="block text-gray-400 text-sm mb-1">UPI ID</label>
                 <input
                   type="text"
-                  value={cardNumber}
-                  onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
-                  placeholder="1234 5678 9012 3456"
-                  className="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-gray-400 text-sm mb-1">Expiry</label>
-                  <input
-                    type="text"
-                    value={expiry}
-                    onChange={(e) => setExpiry(formatExpiry(e.target.value))}
-                    placeholder="MM/YY"
-                    className="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-400 text-sm mb-1">CVV</label>
-                  <input
-                    type="password"
-                    value={cvv}
-                    onChange={(e) => setCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                    placeholder="123"
-                    className="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-gray-400 text-sm mb-1">Card Holder Name</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="John Doe"
+                  value={upiId}
+                  onChange={(e) => setUpiId(e.target.value)}
+                  placeholder="yourname@upi"
                   className="w-full bg-gray-800 border border-gray-700 rounded-md px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
                   required
                 />
@@ -211,7 +160,7 @@ export default function PaymentModal({
                 </button>
                 <button
                   type="submit"
-                  disabled={isProcessing}
+                  disabled={!orderId || isProcessing}
                   className="flex-1 bg-blue-600 text-white py-3 rounded-md hover:bg-blue-500 transition-colors disabled:opacity-50"
                 >
                   {isProcessing ? 'Processing...' : `Pay ₹${amount}`}

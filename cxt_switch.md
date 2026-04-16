@@ -1,3 +1,8 @@
+## Project files
+
+- **Base_file_path:**  `/home/manigupt/Hello/React/reddit-clone/code_atlas.md`
+- **Children_path:**  `/home/manigupt/Hello/React/reddit-clone/children`
+
 ## Codebase Atlas Navigation Flow
 
 - You are not allowed to understand full source code. Only work with task based scope.

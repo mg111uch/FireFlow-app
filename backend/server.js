@@ -35,7 +35,7 @@ app.use('/api/auth', require('./routes/auth')(io, onlineUsers));
 app.use('/api/posts', require('./routes/posts')(io, onlineUsers));
 app.use('/api/agent', require('./routes/agent')(io, onlineUsers));
 app.use('/api/payments', authenticateToken, require('./routes/payments')(io, onlineUsers));
-app.use('/api/flowpay', authenticateToken, require('./routes/flowpay'));
+app.use('/api/flowpay', require('./routes/flowpay'));
 app.use('/api/communities', require('./routes/communities')(io, onlineUsers));
 app.use('/api/users', require('./routes/users')(io, onlineUsers));
 app.use('/api/notifications', require('./routes/notifications')(io, onlineUsers));

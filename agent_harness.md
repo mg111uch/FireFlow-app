@@ -3,8 +3,9 @@
 
 ## TASK
 
-Find reason why in `React/reddit-clone/frontend/app/gigs/GigForm.tsx` submitting form does not insert pickup and dropoff latitude and longitude in backend databse.
-Do not give code, just a concise plan or answer.
+Find issue why in `React/reddit-clone/frontend/app/services/forms/[formId]/fill/page.tsx` after form submission payment success, the callback page redirects to /services page. Instead it should redirect to `React/reddit-clone/frontend/app/services/[serviceName]/[subserviceName]/page.tsx`
+
+Do not give code or make any changes, just a concise plan or answer.
 
 ## Code Execution & Validation Environment
 
@@ -15,8 +16,6 @@ Do not give code, just a concise plan or answer.
 
 ## Project files
 
-- **Base_file_path:**  `/home/manigupt/Hello/React/reddit-clone/code_atlas.md`
-- **Children_path:**  `/home/manigupt/Hello/React/reddit-clone/children`
 - **Backend Source_code:** (Working directory) `/home/manigupt/Hello/React/reddit-clone/backend`
 - **Frontend Source_code:** (Working directory) `/home/manigupt/Hello/React/reddit-clone/frontend`
 

@@ -1,204 +1,239 @@
-/**
- * backend/routes/payments.js
- *
- * FIX applied to server.js mount — add authenticateToken:
- *
- *   const { authenticateToken } = require('./middleware/auth');
- *   app.use('/api/payments', authenticateToken, require('./routes/payments')(io, onlineUsers));
- *
- * Required env vars:
- *   RAZORPAY_KEY_ID      — rzp_test_...
- *   RAZORPAY_KEY_SECRET  — your secret
- */
-
 const express = require('express');
+const axios = require('axios');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const db = require('../database');
-
-const router = express.Router();
-
-const USE_MOCK_GATEWAY = process.env.USE_MOCK_GATEWAY === 'true';
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-/**
- * POST /api/payments/create-order
- *
- * 1. Creates a Razorpay order
- * 2. Inserts a 'created' row into the payments table
- * Returns: { orderId, amount, currency, keyId }
- */
+const router = express.Router();
+
 router.post('/create-order', async (req, res) => {
   try {
-    const { amount, receipt } = req.body;
+    const { amount, gateway } = req.body;
 
-    if (!amount || typeof amount !== 'number' || amount <= 0) {
-      return res.status(400).json({ error: 'Invalid amount. Must be a positive number in INR.' });
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ error: 'Invalid amount' });
     }
 
     const amountPaise = Math.round(amount * 100);
 
-    if (USE_MOCK_GATEWAY) {
-      const mockOrderId = 'fp_order_' + crypto.randomBytes(12).toString('hex');
-      
-      db.run(
-        `INSERT INTO payments (user_id, razorpay_order_id, amount_paise, currency, status, purpose)
-         VALUES (?, ?, ?, ?, 'created', 'subscription_fee')`,
-        [req.user.id, mockOrderId, amountPaise, 'INR'],
-        (err) => {
-          if (err) console.error('[Flowpay] DB insert error:', err.message);
+    let order;
+
+    if (gateway === 'flowpay') {
+      const fpRes = await axios.post(
+        `${process.env.FLOWPAY_BASE_URL}/create-order`,
+        { amount },
+        {
+          headers: {
+            'x-flowpay-id': process.env.FLOWPAY_ID,
+            'x-flowpay-secret': process.env.FLOWPAY_SECRET,
+          },
         }
       );
 
-      return res.status(200).json({
-        orderId: mockOrderId,
+      order = {
+        order_id: fpRes.data.order_id,
+        amount: amountPaise,
+        gateway: 'flowpay',
+      };
+    } 
+
+    if (gateway === 'razorpay') {
+      const rpRes = await razorpay.orders.create({
         amount: amountPaise,
         currency: 'INR',
-        keyId: 'flowpay_mock_key',
-        isMock: true,
+        receipt: `rcpt_${req.user.id}_${Date.now()}`,
       });
+
+      order = {
+        order_id: rpRes.id,
+        amount: rpRes.amount,
+        currency: rpRes.currency,
+        gateway: 'razorpay',
+      }
     }
 
-    const options = {
-      amount: amountPaise,
-      currency: 'INR',
-      receipt: receipt || `rcpt_${req.user.id}_${Date.now()}`,
-      notes: {
-        userId: req.user.id,
-        purpose: 'subscription_fee',
-      },
-    };
+    if (!order) return res.status(400).json({ error: 'Invalid gateway' });
 
-    const order = await razorpay.orders.create(options);
-
-    // Persist order to DB with status 'created'
-    db.run(
-      `INSERT INTO payments (user_id, razorpay_order_id, amount_paise, currency, status, purpose)
-       VALUES (?, ?, ?, ?, 'created', 'subscription_fee')`,
-      [req.user.id, order.id, amountPaise, order.currency],
-      (err) => {
-        if (err) console.error('[Payments] DB insert error (create-order):', err.message);
-      }
-    );
-
-    return res.status(200).json({
-      orderId: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      keyId: process.env.RAZORPAY_KEY_ID,
+    await new Promise((resolve, reject) => {
+      db.run(
+        `INSERT INTO payments (user_id, order_id, amount_paise, status, gateway)
+        VALUES (?, ?, ?, 'created', ?)`,
+        [req.user.id, order.order_id, order.amount, order.gateway],function(err) {
+          if (err) {
+            console.error("INSERT ERROR:", err);
+            reject(err);
+          } else {
+            console.log("INSERT SUCCESS:", order.order_id);
+            resolve();
+          }
+        }
+      );
     });
-  } catch (error) {
-    console.error('[Razorpay] create-order error:', error);
-    return res.status(500).json({ error: 'Failed to create payment order.' });
+
+    return res.json({
+      order_id: order.order_id,
+      amount: order.amount,
+      gateway: order.gateway,
+      key_id:
+        order.gateway === 'razorpay'
+          ? process.env.RAZORPAY_KEY_ID
+          : 'flowpay_mock_key',
+    });
+
+  } catch (err) {
+    console.error("CREATE ORDER ERROR:", err?.response?.data || err.message);
+    return res.status(500).json({ error: 'Create order failed' });
   }
 });
 
-/**
- * POST /api/payments/verify
- *
- * 1. Verifies Razorpay HMAC-SHA256 signature
- * 2. Updates the payments row to status 'verified'
- * 3. Extend here to activate subscription for req.user.id
- */
+router.post('/process', async (req, res) => {
+  const { order_id } = req.body;
+
+  console.log("PROCESS INPUT:", order_id, req.user.id);
+
+  const payment = await new Promise((resolve, reject) => {
+    db.get(
+      `SELECT * FROM payments WHERE order_id=?`,
+      [order_id],
+      (err, row) => {
+        if (err) reject(err);
+        else resolve(row);
+      }
+    );
+  });
+
+  console.log("PAYMENT FOUND:", payment);
+
+  if (!payment) {
+    return res.status(400).json({ error: 'Payment not found' });
+  }
+
+  if (payment.gateway !== 'flowpay') {
+    return res.status(400).json({ error: 'Wrong gateway' });
+  }
+
+  const fpRes = await axios.post(
+    `${process.env.FLOWPAY_BASE_URL}/process`,
+    { order_id },
+    {
+      headers: {
+        'x-flowpay-id': process.env.FLOWPAY_ID,
+        'x-flowpay-secret': process.env.FLOWPAY_SECRET,
+      },
+    }
+  );
+
+  const { payment_id, signature } = fpRes.data;
+
+  await new Promise((resolve, reject) => {
+    db.run(
+      `UPDATE payments 
+      SET payment_id = ?, status = 'processing', signature = ?
+      WHERE order_id = ?`,
+      [payment_id, signature, order_id],
+      function (err) {
+        if (err) {
+          console.error("PROCESS UPDATE ERROR:", err);
+          reject(err);
+        } else {
+          console.log("PROCESS UPDATE SUCCESS:", payment_id);
+          resolve();
+        }
+      }
+    );
+  });
+
+  return res.json(fpRes.data);
+});
+
 router.post('/verify', async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    const { order_id, payment_id, signature } = req.body;
 
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-      return res.status(400).json({ error: 'Missing payment verification fields.' });
+    console.log("VERIFY INPUT:", order_id, payment_id, signature);
+
+    const payment = await new Promise((resolve, reject) => {
+      db.get(
+        `SELECT * FROM payments WHERE order_id = ?`,
+        [order_id],
+        (err, row) => {
+          if (err) reject(err);
+          else resolve(row);
+        }
+      );
+    });
+
+    // console.log("DB PAYMENT:", payment);
+
+    if (!payment) {
+      return res.status(400).json({ error: 'Payment not found' });
     }
 
-    if (USE_MOCK_GATEWAY || razorpay_order_id.startsWith('fp_order_')) {
-      const expectedSignature = crypto
-        .createHmac('sha256', process.env.FLOWPAY_SECRET || 'flowpay_secret_key')
-        .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-        .digest('hex');
+    console.log("GATEWAY:", payment?.gateway);
 
-      if (razorpay_signature !== expectedSignature) {
-        db.run(
-          `UPDATE payments SET status = 'failed' WHERE razorpay_order_id = ? AND user_id = ?`,
-          [razorpay_order_id, req.user.id]
+    let isValid = false;
+
+    if (payment.gateway === 'razorpay') {
+      const expected = crypto
+          .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+          .update(`${order_id}|${payment_id}`)
+          .digest('hex');
+
+      isValid = crypto.timingSafeEqual(
+          Buffer.from(expected, 'hex'),
+          Buffer.from(signature, 'hex')
         );
-        return res.status(400).json({ error: 'Payment signature verification failed.' });
-      }
+    }       
 
-      db.run(
-        `UPDATE payments
-         SET status = 'verified',
-             razorpay_payment_id = ?,
-             verified_at = CURRENT_TIMESTAMP
-         WHERE razorpay_order_id = ? AND user_id = ?`,
-        [razorpay_payment_id, razorpay_order_id, req.user.id],
-        (err) => {
-          if (err) console.error('[Flowpay] DB update error:', err.message);
+    if (payment.gateway === 'flowpay') {
+      const fpRes = await axios.post(
+        `${process.env.FLOWPAY_BASE_URL}/verify`,
+        {
+          order_id,
+          payment_id,
+          signature,
+        },
+        {
+          headers: {
+            'x-flowpay-id': process.env.FLOWPAY_ID,
+            'x-flowpay-secret': process.env.FLOWPAY_SECRET,
+          },
         }
       );
 
-      console.log(`[Flowpay] Verified — user ${req.user.id}, payment ${razorpay_payment_id}`);
-
-      return res.status(200).json({
-        success: true,
-        paymentId: razorpay_payment_id,
-        message: 'Payment verified and subscription activated.',
-      });
+      isValid = fpRes.data.valid;
     }
-
-    // Step 1: Verify HMAC-SHA256 signature
-    const body = `${razorpay_order_id}|${razorpay_payment_id}`;
-    const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-      .update(body)
-      .digest('hex');
-
-    // Wrap in try/catch — timingSafeEqual throws if buffer lengths differ
-    let isValid = false;
-    try {
-      isValid = crypto.timingSafeEqual(
-        Buffer.from(expectedSignature, 'hex'),
-        Buffer.from(razorpay_signature, 'hex')
-      );
-    } catch {
-      isValid = false;
-    }
+    
 
     if (!isValid) {
-      db.run(
-        `UPDATE payments SET status = 'failed' WHERE razorpay_order_id = ? AND user_id = ?`,
-        [razorpay_order_id, req.user.id]
-      );
-      return res.status(400).json({ error: 'Payment signature verification failed.' });
+      await new Promise((resolve, reject) => {
+        db.run(
+          `UPDATE payments SET status='failed' WHERE order_id=?`,[order_id], (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+      return res.status(400).json({ error: 'Invalid signature' });
     }
 
-    // Step 2: Update DB — verified status + payment_id + timestamp
-    db.run(
-      `UPDATE payments
-       SET status = 'verified',
-           razorpay_payment_id = ?,
-           verified_at = CURRENT_TIMESTAMP
-       WHERE razorpay_order_id = ? AND user_id = ?`,
-      [razorpay_payment_id, razorpay_order_id, req.user.id],
-      (err) => {
-        if (err) console.error('[Payments] DB update error (verify):', err.message);
-      }
-    );
-
-    // Step 3: Activate subscription — extend here, e.g.:
-    // db.run(`UPDATE users SET subscription_status = 'active' WHERE id = ?`, [req.user.id]);
-
-    console.log(`[Razorpay] Verified — user ${req.user.id}, payment ${razorpay_payment_id}`);
-
-    return res.status(200).json({
-      success: true,
-      paymentId: razorpay_payment_id,
-      message: 'Payment verified and subscription activated.',
+    await new Promise((resolve, reject) => {
+      db.run(
+        `UPDATE payments SET status='verified', payment_id=?, signature=?, verified_at=CURRENT_TIMESTAMP WHERE order_id=?`,
+      [payment_id, signature, order_id], (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
     });
-  } catch (error) {
-    console.error('[Razorpay] verify error:', error);
-    return res.status(500).json({ error: 'Payment verification failed.' });
+
+    return res.json({ success: true });
+
+  } catch {
+    return res.status(500).json({ error: 'Verify failed' });
   }
 });
 

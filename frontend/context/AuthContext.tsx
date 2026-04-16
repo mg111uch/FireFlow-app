@@ -36,13 +36,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const expirationTime = decodedToken.exp * 1000;
         const timeUntilExpiration = expirationTime - Date.now();
 
-        if (timeUntilExpiration <= 0) {
-          logout();
-        } else {
-          setIsAuthenticated(true);
-          setCurrentUser(decodedToken);
-          setToken(storedToken);
-          setIsAdmin(decodedToken.role === 'admin' || decodedToken.isAdmin === true);
+         if (timeUntilExpiration <= 0) {
+           logout();
+         } else {
+           setIsAuthenticated(true);
+           setCurrentUser(decodedToken);
+           setToken(storedToken);
+           setIsAdmin(decodedToken.id === 1 || decodedToken.role === 'admin' || decodedToken.isAdmin === true);
 
           expirationTimeoutRef.current = setTimeout(() => {
             logout();

@@ -2,9 +2,9 @@
 
 import React, { use, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
-import { getServiceBySlug, Service, SubService } from '@/lib/services-data';
+import { getServiceBySlug } from '@/lib/services-data';
 import { FormSubmission } from '@/lib/types';
 import ResponsesCard from '@/app/services/ResponsesCard';
 import { API_URL } from '@/lib/config';
@@ -32,6 +32,24 @@ export default function SubservicePage({ params }: SubservicePageProps) {
   const [loadingSubmissions, setLoadingSubmissions] = useState(false);
   const [formId, setFormId] = useState<number | null>(null);
   const [loadingFormId, setLoadingFormId] = useState(true);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('formSubmitted') === '1') {
+      setToast({ type: 'success', message: 'Form submitted and payment verified!' });
+      // Remove the query flag while staying on the page
+      const cleanPath = window.location.pathname;
+      window.history.replaceState({}, '', cleanPath);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
 
   useEffect(() => {
     if (!subservice) return;
@@ -58,19 +76,22 @@ export default function SubservicePage({ params }: SubservicePageProps) {
   useEffect(() => {
     if (!subservice || !formId) return;
 
-    const fetchSubmissions = async () => {
-      setLoadingSubmissions(true);
-      try {
-        // Use public endpoint - no auth required
-        const res = await axios.get(`${API_URL}/api/forms/${formId}/submissions/public`);
-        setSubmissions(res.data);
-      } catch (err: any) {
-        console.error('Error fetching submissions:', err);
-        setSubmissions([]);
-      } finally {
-        setLoadingSubmissions(false);
-      }
-    };
+     const fetchSubmissions = async () => {
+         setLoadingSubmissions(true);
+         try {
+           // Use public endpoint - no auth required
+           const res = await axios.get(`${API_URL}/api/forms/${formId}/submissions/public`);
+           // Sort newest first (highest ID = latest)
+           const sorted = (res.data as Array<FormSubmission & { id: number }>)
+             .sort((a, b) => b.id - a.id);
+           setSubmissions(sorted);
+         } catch (err: any) {
+           console.error('Error fetching submissions:', err);
+           setSubmissions([]);
+         } finally {
+           setLoadingSubmissions(false);
+         }
+       };
 
     fetchSubmissions();
   }, [subservice, formId]);
@@ -138,6 +159,16 @@ export default function SubservicePage({ params }: SubservicePageProps) {
           <p className="text-center text-gray-500">Add your own to get started.</p>
           <p className="text-center text-gray-500">No services listed yet.</p>
         </>
+      )}
+
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-lg shadow-lg text-sm font-medium text-white transition-all ${
+            toast.type === 'success' ? 'bg-green-600' : 'bg-red-500'
+          }`}
+        >
+          {toast.message}
+        </div>
       )}
       
     </div>
