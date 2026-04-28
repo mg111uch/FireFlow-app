@@ -109,7 +109,7 @@ export interface FormQuestionOption {
 export interface FormQuestion {
   id?: number; // Optional if not yet saved to DB
   question_text: string;
-  question_type: 'text' | 'textarea' | 'radio';
+  question_type: 'text' | 'textarea' | 'radio' | 'image_file';
   order_index?: number; // Backend handles this
   options?: FormQuestionOption[]; // For radio/checkbox
 }
@@ -134,7 +134,7 @@ export interface FormSubmission {
   submitter_id?: number;
   submitter_username?: string;
   submitted_at: string;
-  answers: { question_text: string; answer_text: string }[];
+  answers: { question_text: string; question_type?: string; answer_text: string }[];
 }
 
 // Prediction Market types

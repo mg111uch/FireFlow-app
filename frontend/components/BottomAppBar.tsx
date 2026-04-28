@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation'; 
-import { HomeIcon, ChatsIcon, SearchIcon, ServicesIcon, ProfileIcon } from '../lib/icons';
+import { HomeIcon, ChatsIcon, ShopsIcon, ServicesIcon, ProfileIcon } from '../lib/icons';
 
 // Define main tab routes
 const MAIN_TABS = ['/', '/chats', '/services', '/shop', '/profile'];
@@ -31,7 +31,7 @@ export default function BottomAppBar() {
       </>
     )},        
     { href: '/services', label: 'Services', icon: <ServicesIcon className="size-6" />},
-    { href: '/shop', label: 'Showcase', icon: <SearchIcon className="size-6" />},
+    { href: '/shop', label: 'Shops', icon: <ShopsIcon className="size-6" />},
     { href: '/profile', label: 'Profile', icon: <ProfileIcon className="size-6" />},
   ];
 

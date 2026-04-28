@@ -9,7 +9,7 @@ interface QuestionEditorProps {
 }
 
 export default function QuestionEditor({ questions, setQuestions }: QuestionEditorProps) {
-  const addQuestion = (type: 'text' | 'textarea' | 'radio') => {
+  const addQuestion = (type: 'text' | 'textarea' | 'radio' | 'image_file') => {
     setQuestions([...questions, {
       question_text: '',
       question_type: type,
@@ -146,29 +146,36 @@ export default function QuestionEditor({ questions, setQuestions }: QuestionEdit
         ))}
       </div>
 
-      <div className="flex space-x-2 mb-6">
-        <button
-          type="button"
-          onClick={() => addQuestion('text')}
-          className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
-        >
-          Add Short Text Field
-        </button>
-        <button
-          type="button"
-          onClick={() => addQuestion('textarea')}
-          className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
-        >
-          Add Paragraph Field
-        </button>
-        <button
-          type="button"
-          onClick={() => addQuestion('radio')}
-          className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
-        >
-          Add Radio Field
-        </button>
-      </div>
+       <div className="flex space-x-2 mb-6">
+         <button
+           type="button"
+           onClick={() => addQuestion('text')}
+           className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
+         >
+           Add Short Text Field
+         </button>
+         <button
+           type="button"
+           onClick={() => addQuestion('textarea')}
+           className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
+         >
+           Add Paragraph Field
+         </button>
+         <button
+           type="button"
+           onClick={() => addQuestion('radio')}
+           className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
+         >
+           Add Radio Field
+         </button>
+         <button
+           type="button"
+           onClick={() => addQuestion('image_file')}
+           className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700"
+         >
+           Add Image Upload Field
+         </button>
+       </div>
     </>
   );
 }

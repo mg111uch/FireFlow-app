@@ -18,6 +18,8 @@ export default function ShortcutSettings({ isOpen, onClose }: ShortcutSettingsPr
     availableIcons,
   } = useShortcutsContext();
 
+  const userShortcuts = shortcuts.filter(s => !s.permanent);
+
   const [label, setLabel] = useState('');
   const [link, setLink] = useState('');
   const [selectedIcon, setSelectedIcon] = useState(0);
@@ -74,7 +76,7 @@ export default function ShortcutSettings({ isOpen, onClose }: ShortcutSettingsPr
         <div className="flex-1 overflow-y-auto p-4">
           {shortcuts.length > 0 && (
             <div className="mb-4">
-              <h3 className="text-sm text-gray-400 mb-2">Current Shortcuts ({shortcuts.length}/{maxShortcuts})</h3>
+              <h3 className="text-sm text-gray-400 mb-2">Shortcuts ({userShortcuts.length}/{maxShortcuts})</h3>
               <div className="space-y-2">
                 {shortcuts.map((s) => (
                   <div key={s.id} className="flex items-center justify-between bg-gray-700 p-2 rounded">
@@ -84,12 +86,14 @@ export default function ShortcutSettings({ isOpen, onClose }: ShortcutSettingsPr
                       </div>
                       <span className="text-white text-sm">{s.label}</span>
                     </div>
-                    <button
-                      onClick={() => removeShortcut(s.id)}
-                      className="text-red-400 hover:text-red-300 text-sm"
-                    >
-                      Remove
-                    </button>
+                    {!s.permanent && (
+                      <button
+                        onClick={() => removeShortcut(s.id)}
+                        className="text-red-400 hover:text-red-300 text-sm"
+                      >
+                        Remove
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -140,7 +144,7 @@ export default function ShortcutSettings({ isOpen, onClose }: ShortcutSettingsPr
               <div className="flex gap-2 pt-2">
                 <button
                   onClick={handleAddShortcut}
-                  disabled={!label.trim() || !link.trim() || shortcuts.length >= maxShortcuts}
+                  disabled={!label.trim() || !link.trim() || userShortcuts.length >= maxShortcuts}
                   className="flex-1 bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 disabled:opacity-50"
                 >
                   Add Shortcut
@@ -153,9 +157,9 @@ export default function ShortcutSettings({ isOpen, onClose }: ShortcutSettingsPr
                 </button>
               </div>
             </div>
-          ) : (
-            <div>
-              {shortcuts.length < maxShortcuts && (
+               ) : (
+                 <div>
+                   {userShortcuts.length < maxShortcuts && (
                 <>
                   <div className="mb-4">
                     <h3 className="text-sm text-gray-400 mb-2">Add from Subservices</h3>
@@ -192,9 +196,9 @@ export default function ShortcutSettings({ isOpen, onClose }: ShortcutSettingsPr
                   </div>
                 </>
               )}
-              {shortcuts.length >= maxShortcuts && (
-                <p className="text-center text-gray-400">Maximum {maxShortcuts} shortcuts reached.</p>
-              )}
+               {userShortcuts.length >= maxShortcuts && (
+                 <p className="text-center text-gray-400">Maximum {maxShortcuts} shortcuts reached.</p>
+               )}
             </div>
           )}
         </div>

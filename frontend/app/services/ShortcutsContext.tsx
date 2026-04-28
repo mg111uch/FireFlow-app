@@ -8,6 +8,7 @@ export interface Shortcut {
   label: string;
   link: string;
   iconIndex: number;
+  permanent?: boolean;
 }
 
 const STORAGE_KEY = 'serviceShortcuts';
@@ -29,9 +30,23 @@ function getStoredShortcuts(): Shortcut[] {
   }
 }
 
+function getPermanentShortcuts(): Shortcut[] {
+  return [
+    {
+      id: 'gigs-permanent',
+      label: 'Gigs',
+      link: '/gigs',
+      iconIndex: 0,
+      permanent: true,
+    },
+  ];
+}
+
 function saveShortcuts(shortcuts: Shortcut[]): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(shortcuts));
+  // Only save non-permanent shortcuts
+  const userShortcuts = shortcuts.filter(s => !s.permanent);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(userShortcuts));
 }
 
 interface ShortcutsContextType {
@@ -52,13 +67,21 @@ export function ShortcutsProvider({ children }: { children: ReactNode }) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    setShortcuts(getStoredShortcuts());
+    const stored = getStoredShortcuts();
+    const permanent = getPermanentShortcuts();
+    // Remove any stored shortcuts that conflict with permanent routes
+    const nonConflicting = stored.filter(s => !permanent.some(p => p.link === s.link));
+    setShortcuts([...permanent, ...nonConflicting]);
     setIsLoaded(true);
   }, []);
 
   const addShortcut = useCallback((label: string, link: string, iconIndex: number = 0) => {
     setShortcuts((prev) => {
-      if (prev.length >= MAX_SHORTCUTS) return prev;
+      const permanentLinks = getPermanentShortcuts().map(p => p.link);
+      // Block links that are reserved by permanent shortcuts
+      if (permanentLinks.includes(link)) return prev;
+      const userCount = prev.filter(s => !s.permanent).length;
+      if (userCount >= MAX_SHORTCUTS) return prev;
       const newShortcut: Shortcut = {
         id: generateId(),
         label,
@@ -73,6 +96,10 @@ export function ShortcutsProvider({ children }: { children: ReactNode }) {
 
   const removeShortcut = useCallback((id: string) => {
     setShortcuts((prev) => {
+      // Don't allow removal of permanent shortcuts
+      const shortcut = prev.find(s => s.id === id);
+      if (shortcut?.permanent) return prev;
+      
       const updated = prev.filter((s) => s.id !== id);
       saveShortcuts(updated);
       return updated;
@@ -88,14 +115,19 @@ export function ShortcutsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const getAvailableSubservices = useCallback(() => {
+    const permanentLinks = getPermanentShortcuts().map(p => p.link);
     const all: { label: string; link: string }[] = [];
     services.forEach((service) => {
       service.subservices.forEach((subservice) => {
         const slugName = encodeURIComponent(subservice.name.toLowerCase().replace(/\s+/g, '-'));
-        all.push({
-          label: subservice.name,
-          link: `/services/${service.slug}/${slugName}`,
-        });
+        const link = `/services/${service.slug}/${slugName}`;
+        // Exclude links that are permanent routes
+        if (!permanentLinks.includes(link)) {
+          all.push({
+            label: subservice.name,
+            link,
+          });
+        }
       });
     });
     return all;

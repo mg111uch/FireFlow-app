@@ -43,21 +43,33 @@ export default function FormPreview({ questions }: FormPreviewProps) {
                 />
               )}
               
-              {q.question_type === 'radio' && q.options && (
-                <div className="space-y-2">
-                  {q.options.map((option, oIndex) => (
-                    <label key={oIndex} className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="radio"
-                        name={`preview-${qIndex}`}
-                        className="w-4 h-4"
-                        disabled
-                      />
-                      <span className="text-gray-300">{option.option_text || `Option ${oIndex + 1}`}</span>
-                    </label>
-                  ))}
-                </div>
-              )}
+               {q.question_type === 'radio' && q.options && (
+                 <div className="space-y-2">
+                   {q.options.map((option, oIndex) => (
+                     <label key={oIndex} className="flex items-center space-x-2 cursor-pointer">
+                       <input
+                         type="radio"
+                         name={`preview-${qIndex}`}
+                         className="w-4 h-4"
+                         disabled
+                       />
+                       <span className="text-gray-300">{option.option_text || `Option ${oIndex + 1}`}</span>
+                     </label>
+                   ))}
+                 </div>
+               )}
+
+               {q.question_type === 'image_file' && (
+                 <div className="mt-2">
+                   <input
+                     type="file"
+                     accept="image/*"
+                     className="border p-2 w-full rounded-md text-gray-300 bg-gray-700"
+                     disabled
+                   />
+                   <p className="text-sm text-gray-400 mt-1">Upload an image (max 5MB)</p>
+                 </div>
+               )}
             </div>
           ))}
         </div>

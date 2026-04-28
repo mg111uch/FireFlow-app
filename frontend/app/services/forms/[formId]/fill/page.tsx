@@ -14,6 +14,14 @@ interface Answer {
   answerText: string;
 }
 
+interface UploadedFile {
+  questionId: number;
+  file: File | null;
+  preview: string | null;
+  uploading: boolean;
+  error: string | null;
+}
+
 export default function FillFormPage({ params }: { params: Promise<{ formId: string }> }) {
   const router = useRouter();
   const { isAdmin } = useAuth();
@@ -22,12 +30,13 @@ export default function FillFormPage({ params }: { params: Promise<{ formId: str
   const returnUrl = searchParams.get('returnUrl') || '/services';
 
   const [form, setForm] = useState<Form | null>(null);
-  const [answers, setAnswers] = useState<Answer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [pageerror, setPageError] = useState<string | null>(null);
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-  const [paymentAmount, setPaymentAmount] = useState<number>(0);
+   const [answers, setAnswers] = useState<Answer[]>([]);
+   const [loading, setLoading] = useState(true);
+   const [pageerror, setPageError] = useState<string | null>(null);
+   const [currentUser, setCurrentUser] = useState<any>(null);
+   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+   const [paymentAmount, setPaymentAmount] = useState<number>(0);
+   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
 
   const { openPayment, isLoading, GatewayModal, FlowPayModal } = usePayment();
 
@@ -66,6 +75,15 @@ export default function FillFormPage({ params }: { params: Promise<{ formId: str
             answerText: '',
           }))
         );
+        setUploadedFiles(
+          res.data.questions.map((q: FormQuestion) => ({
+            questionId: q.id!,
+            file: null,
+            preview: null,
+            uploading: false,
+            error: null,
+          }))
+        );
       } catch (err: any) {
         setPageError(err.response?.data?.error || 'Failed to load form.');
       } finally {
@@ -86,6 +104,60 @@ export default function FillFormPage({ params }: { params: Promise<{ formId: str
       }
       return [...prev, { questionId, answerText: value }];
     });
+  };
+
+  const handleFileSelect = async (questionId: number, file: File) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setToast({ type: 'error', message: 'You must be logged in to upload files.' });
+      return;
+    }
+
+    setUploadedFiles((prev) =>
+      prev.map((f) =>
+        f.questionId === questionId
+          ? { ...f, uploading: true, error: null }
+          : f
+      )
+    );
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const res = await axios.post(`${API_URL}/api/forms/upload-image`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const imageUrl = res.data.imageUrl;
+
+      // Create preview URL
+      const previewUrl = `${API_URL}/api-uploads${imageUrl}`;
+
+      setUploadedFiles((prev) =>
+        prev.map((f) =>
+          f.questionId === questionId
+            ? { ...f, file, preview: previewUrl, uploading: false }
+            : f
+        )
+      );
+
+      // Store image URL in answers
+      handleAnswerChange(questionId, imageUrl);
+    } catch (err: any) {
+      console.error('Error uploading image:', err);
+      setUploadedFiles((prev) =>
+        prev.map((f) =>
+          f.questionId === questionId
+            ? { ...f, uploading: false, error: err.response?.data?.error || 'Failed to upload image' }
+            : f
+        )
+      );
+      setToast({ type: 'error', message: 'Failed to upload image.' });
+    }
   };
 
   const validateForm = (): boolean => {
@@ -176,48 +248,92 @@ export default function FillFormPage({ params }: { params: Promise<{ formId: str
       </p>
 
       <form className="bg-gray-800 pt-3">
-        {form.questions?.map((q) => (
-          <div key={q.id} className="bg-gray-800 pr-3 pl-3 pb-3">
-            <label className="block text-gray-200 font-semibold">{q.question_text}</label>
-            {q.question_type === 'text' && (
-              <input
-                type="text"
-                value={answers.find((a) => a.questionId === q.id)?.answerText || ''}
-                onChange={(e) => handleAnswerChange(q.id!, e.target.value)}
-                className="border p-2 w-full rounded-md text-gray-300"
-                required
-              />
-            )}
-            {q.question_type === 'textarea' && (
-              <textarea
-                value={answers.find((a) => a.questionId === q.id)?.answerText || ''}
-                onChange={(e) => handleAnswerChange(q.id!, e.target.value)}
-                className="border p-2 w-full rounded-md text-gray-300"
-                rows={4}
-                required
-              />
-            )}
-            {q.question_type === 'radio' && q.options && (
-              <div className="space-y-2">
-                {q.options.map((option) => (
-                  <label key={option.id} className="flex items-center space-x-2 text-gray-200">
-                    <input
-                      type="radio"
-                      name={`question_${q.id}`}
-                      value={option.option_text}
-                      checked={
-                        answers.find((a) => a.questionId === q.id)?.answerText === option.option_text
-                      }
-                      onChange={(e) => handleAnswerChange(q.id!, e.target.value)}
-                      className="form-radio h-4 w-4 text-blue-600"
-                    />
-                    <span>{option.option_text}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+        {form.questions?.map((q) => {
+          const uploaded = uploadedFiles.find((f) => f.questionId === q.id);
+          const answerText = answers.find((a) => a.questionId === q.id)?.answerText || '';
+
+          return (
+            <div key={q.id} className="bg-gray-800 pr-3 pl-3 pb-3">
+              <label className="block text-gray-200 font-semibold">{q.question_text}</label>
+
+              {q.question_type === 'text' && (
+                <input
+                  type="text"
+                  value={answerText}
+                  onChange={(e) => handleAnswerChange(q.id!, e.target.value)}
+                  className="border p-2 w-full rounded-md text-gray-300"
+                  required
+                />
+              )}
+
+              {q.question_type === 'textarea' && (
+                <textarea
+                  value={answerText}
+                  onChange={(e) => handleAnswerChange(q.id!, e.target.value)}
+                  className="border p-2 w-full rounded-md text-gray-300"
+                  rows={4}
+                  required
+                />
+              )}
+
+              {q.question_type === 'radio' && q.options && (
+                <div className="space-y-2">
+                  {q.options.map((option) => (
+                    <label key={option.id} className="flex items-center space-x-2 text-gray-200">
+                      <input
+                        type="radio"
+                        name={`question_${q.id}`}
+                        value={option.option_text}
+                        checked={answerText === option.option_text}
+                        onChange={(e) => handleAnswerChange(q.id!, e.target.value)}
+                        className="form-radio h-4 w-4 text-blue-600"
+                      />
+                      <span>{option.option_text}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              {q.question_type === 'image_file' && (
+                <div className="space-y-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFileSelect(q.id!, file);
+                    }}
+                    className="border p-2 w-full rounded-md text-gray-300 bg-gray-700"
+                    disabled={uploaded?.uploading}
+                  />
+
+                  {uploaded?.uploading && (
+                    <p className="text-sm text-blue-400">Uploading...</p>
+                  )}
+
+                  {uploaded?.error && (
+                    <p className="text-sm text-red-500">{uploaded.error}</p>
+                  )}
+
+                  {uploaded?.preview && (
+                    <div className="mt-2">
+                      <img
+                        src={uploaded.preview}
+                        alt="Uploaded preview"
+                        className="max-w-xs max-h-64 rounded border border-gray-600"
+                      />
+                      <p className="text-sm text-green-400 mt-1">Image uploaded successfully</p>
+                    </div>
+                  )}
+
+                  {answerText && !uploaded?.preview && (
+                    <p className="text-sm text-gray-400">Image uploaded: {answerText}</p>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
 
         <div className="mt-6 flex flex-col items-center gap-3">
           <button

@@ -8,6 +8,7 @@ import { getServiceBySlug } from '@/lib/services-data';
 import { FormSubmission } from '@/lib/types';
 import ResponsesCard from '@/app/services/ResponsesCard';
 import { API_URL } from '@/lib/config';
+import { useAuth } from '@/context/AuthContext';
 
 interface SubservicePageProps {
   params: Promise<{
@@ -17,9 +18,10 @@ interface SubservicePageProps {
 }
 
 export default function SubservicePage({ params }: SubservicePageProps) {
-  const router = useRouter();
-  // Unwrap params using React.use() for Next.js 15+ compatibility
-  const { serviceName, subserviceName } = use(params);
+   const router = useRouter();
+   const { isAdmin } = useAuth();
+   // Unwrap params using React.use() for Next.js 15+ compatibility
+   const { serviceName, subserviceName } = use(params);
   
   const service = getServiceBySlug(serviceName);
   
@@ -84,6 +86,7 @@ export default function SubservicePage({ params }: SubservicePageProps) {
            // Sort newest first (highest ID = latest)
            const sorted = (res.data as Array<FormSubmission & { id: number }>)
              .sort((a, b) => b.id - a.id);
+            console.log(sorted)
            setSubmissions(sorted);
          } catch (err: any) {
            console.error('Error fetching submissions:', err);
@@ -150,11 +153,11 @@ export default function SubservicePage({ params }: SubservicePageProps) {
         <p className="text-gray-400 mb-2 pr-2 pl-2">{subservice.description}</p>
       )}  
 
-      {loadingSubmissions ? (
-        <p className="text-center text-gray-500">Loading submissions...</p>
-      ) : submissions.length > 0 ? (
-        <ResponsesCard submissions={submissions} showHeader={true} title="Service Listings" />
-      ) : (
+       {loadingSubmissions ? (
+         <p className="text-center text-gray-500">Loading submissions...</p>
+       ) : submissions.length > 0 ? (
+         <ResponsesCard submissions={submissions} showHeader={true} title="Service Listings" isAdmin={isAdmin} formId={formId} />
+       ) : (
         <>
           <p className="text-center text-gray-500">Add your own to get started.</p>
           <p className="text-center text-gray-500">No services listed yet.</p>

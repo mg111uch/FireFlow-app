@@ -2,9 +2,19 @@ const express = require('express');
 const db = require('../../database');
 const { authenticateToken } = require('../../middleware/auth');
 const { executeTransaction, insertQuestionsAndOptions, validateFormData } = require('./formDatabaseUtils');
+const upload = require('../../middleware/upload');
 
 module.exports = (io, onlineUsers) => {
   const router = express.Router();
+
+  // POST: Upload image for form question
+  router.post('/upload-image', authenticateToken, upload.single('image'), (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file provided.' });
+    }
+    const imageUrl = `/uploads/${req.file.filename}`;
+    res.json({ imageUrl });
+  });
 
   // POST: Create a new form (general form - current user)
   router.post('/', authenticateToken, (req, res) => {
@@ -17,9 +27,10 @@ module.exports = (io, onlineUsers) => {
       return res.status(400).json(validationError);
     }
 
-    // Default to general form if not specified
-    const finalFormType = form_type || 'general';
-    const finalFormPrice = form_price || 0;
+     // Default to general form if not specified
+     const finalFormType = form_type || 'general';
+     const p = Number(form_price);
+     const finalFormPrice = Number.isNaN(p) ? 0 : Math.round(p);
 
     executeTransaction(async () => {
       // Insert form metadata
@@ -68,10 +79,11 @@ module.exports = (io, onlineUsers) => {
       return res.status(400).json(validationError);
     }
 
-    // Use subservice name as default title if not provided
-    const formTitle = title || `${subservice_name} Service Form`;
-    const creator_id = admin_user_id;
-    const finalFormPrice = form_price || 0;
+     // Use subservice name as default title if not provided
+     const formTitle = title || `${subservice_name} Service Form`;
+     const creator_id = admin_user_id;
+     const p = Number(form_price);
+     const finalFormPrice = Number.isNaN(p) ? 0 : Math.round(p);
 
     executeTransaction(async () => {
       // Insert form metadata

@@ -3,7 +3,7 @@
 
 ## TASK
 
-Find issue why in `React/reddit-clone/frontend/app/services/forms/[formId]/fill/page.tsx` after form submission payment success, the callback page redirects to /services page. Instead it should redirect to `React/reddit-clone/frontend/app/services/[serviceName]/[subserviceName]/page.tsx`
+What changes are needed so that the back button in `React/reddit-clone/frontend/components/TopAppBar.tsx` always takes user one page up, not router back. Back button should always take user closer to main_tabs of `React/reddit-clone/frontend/components/BottomAppBar.tsx`.
 
 Do not give code or make any changes, just a concise plan or answer.
 

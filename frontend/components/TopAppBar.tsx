@@ -1,24 +1,53 @@
 'use client'; 
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { APP_NAME } from '@/lib/config';
 import { useNotification } from '@/context/NotificationContext';
 import { NotificationIcon, MenuIcon, BackIcon } from '@/lib/icons';
 
 // Define main tab routes
-const MAIN_TABS = ['/', '/chats', '/search', '/services', '/profile'];
+const MAIN_TABS = ['/', '/chats', '/services', '/shop', '/profile'];
+
+// Explicit parent route mappings for routes that don't follow URL hierarchy
+const ROUTE_PARENTS: Record<string, string> = {
+  '/gigs': '/services',
+};
+
+function getParentPath(currentPath: string): string {
+  // Check explicit parent mapping first
+  if (ROUTE_PARENTS[currentPath]) {
+    return ROUTE_PARENTS[currentPath];
+  }
+  
+  // Fallback: strip last URL segment (one level up only)
+  const segments = currentPath.split('/').filter(Boolean);
+  if (segments.length === 0) return '/';
+  segments.pop();
+  
+  return '/' + segments.join('/') || '/';
+}
 
 export default function TopAppBar() {
     const { unreadCount } = useNotification();
     const pathname = usePathname();
+    const router = useRouter();
     
     // Check if current route is a main tab
     const isMainTab = MAIN_TABS.includes(pathname);
     const isInSubPage = !isMainTab;
   
   const handleBack = () => {
-    window.history.back();
+    // Check for returnUrl query parameter first
+    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const returnUrl = params.get('returnUrl');
+    
+    if (returnUrl) {
+      router.push(returnUrl);
+    } else {
+      const parentPath = getParentPath(pathname);
+      router.push(parentPath);
+    }
   };
   
   return (

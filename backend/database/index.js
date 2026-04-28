@@ -43,6 +43,8 @@ const db = new sqlite3.Database(dbPath, (err) => {
     console.error('Error opening database:', err.message);
   } else {
     console.log('Connected to SQLite database.');
+    // Enable foreign key constraints (required for ON DELETE CASCADE to work)
+    db.run('PRAGMA foreign_keys = ON');
     db.serialize(() => {
       db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='users'", (err, row) => {
         if (!row) {
