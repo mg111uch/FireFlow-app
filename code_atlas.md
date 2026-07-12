@@ -1,28 +1,18 @@
 # 🗺️ CODEBASE ATLAS
 **Generated:** 2026-01-28 15:13:20
 
-**Quick Navigation:** This is Layer 1 (overview). For details, see children/ folder.
-
----
-
-Legend: │=sep ►=internal ●=external ⚡=entry 🔴=HIGH 🟡=MED 🟢=LOW ⚪=SAFE
-
 ## Codebase size
-Total files processed: 151
-Total lines of code: 16572
-Total tokens: 152966
+Total files processed: 155
+Total lines of code: 18322
+Total tokens: 168416
 ## End Codebase size
-
-Entries: F005
-
-HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket🔴,F064:useAuth🔴
 
 ## Directory Structure 
 - **Project path:** `/home/manigupt/Hello/React/reddit-clone`
 ### FILE_MAP Tree
-├── backend/
-│   ├── database/
-│   │   ├── schema/
+├── backend/ [5872 LOC, 233566 tokens]
+│   ├── database/ [1301 LOC, 195555 tokens]
+│   │   ├── schema/ [512 LOC, 3156 tokens]
 │   │   │   ├── [] payments.js [52 LOC, 290 tokens]
 │   │   │   ├── [] forms.js [75 LOC, 465 tokens]
 │   │   │   ├── [] users.js [26 LOC, 129 tokens]
@@ -32,31 +22,31 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   │   ├── [] marketplace.js [53 LOC, 309 tokens]
 │   │   │   ├── [] social.js [165 LOC, 1055 tokens]
 │   │   │   └── [] messaging.js [35 LOC, 235 tokens]
-│   │   ├── [] modify_table.js [89 LOC, 613 tokens]
-│   │   ├── [] index.js [106 LOC, 599 tokens]
-│   │   └── [] reddit_clone.db [0 LOC, 0 tokens]
-│   ├── utils/
+│   │   ├── [] modify_table.js [105 LOC, 736 tokens]
+│   │   ├── [] index.js [108 LOC, 625 tokens]
+│   │   └── [] reddit_clone.db [576 LOC, 191038 tokens]
+│   ├── utils/ [289 LOC, 2859 tokens]
 │   │   ├── [] socketHandlers.js [225 LOC, 2145 tokens]
 │   │   ├── [] notificationHelper.js [46 LOC, 443 tokens]
 │   │   └── [] postQueries.js [18 LOC, 271 tokens]
-│   ├── middleware/
+│   ├── middleware/ [156 LOC, 1044 tokens]
 │   │   ├── [] agentAuth.js [80 LOC, 525 tokens]
 │   │   ├── [] auth.js [40 LOC, 283 tokens]
 │   │   └── [] upload.js [36 LOC, 236 tokens]
-│   ├── routes/
-│   │   ├── posts/
+│   ├── routes/ [3911 LOC, 32414 tokens]
+│   │   ├── posts/ [715 LOC, 7113 tokens]
 │   │   │   ├── [] saves.router.js [53 LOC, 567 tokens]
 │   │   │   ├── [] views.router.js [27 LOC, 266 tokens]
 │   │   │   ├── [] votes.router.js [152 LOC, 1533 tokens]
 │   │   │   ├── [] posts.router.js [257 LOC, 2380 tokens]
 │   │   │   └── [] comments.router.js [226 LOC, 2367 tokens]
-│   │   ├── forms/
+│   │   ├── forms/ [752 LOC, 6234 tokens]
 │   │   │   ├── [] formRetrieval.js [95 LOC, 890 tokens]
 │   │   │   ├── [] formDatabaseUtils.js [130 LOC, 881 tokens]
-│   │   │   ├── [] formModification.js [88 LOC, 767 tokens]
-│   │   │   ├── [] formSubmissions.js [145 LOC, 1253 tokens]
+│   │   │   ├── [] formModification.js [194 LOC, 1622 tokens]
+│   │   │   ├── [] formSubmissions.js [197 LOC, 1761 tokens]
 │   │   │   ├── [] index.js [16 LOC, 123 tokens]
-│   │   │   └── [] formCreation.js [108 LOC, 841 tokens]
+│   │   │   └── [] formCreation.js [120 LOC, 957 tokens]
 │   │   ├── [] shop-orders.js [191 LOC, 1595 tokens]
 │   │   ├── [] notifications.js [67 LOC, 504 tokens]
 │   │   ├── [] payments.js [242 LOC, 1478 tokens]
@@ -76,63 +66,63 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   ├── [] package.json [29 LOC, 239 tokens]
 │   ├── [] app.js [61 LOC, 449 tokens]
 │   └── [] server.js [113 LOC, 930 tokens]
-├── agentic_ui/
+├── agentic_ui/ [1204 LOC, 9281 tokens]
 │   ├── [] parse_action.js [233 LOC, 1620 tokens]
 │   ├── [] agent.js [287 LOC, 2161 tokens]
 │   ├── [] generate_feed.js [182 LOC, 1443 tokens]
 │   ├── [] feed.md [57 LOC, 655 tokens]
 │   ├── [] agent_skill.md [411 LOC, 3226 tokens]
 │   └── [] send_msg.md [34 LOC, 176 tokens]
-├── frontend/
-│   ├── app/
-│   │   ├── communities/
-│   │   │   ├── edit-community/
-│   │   │   │   └── [communityId]/
+├── frontend/ [15147 LOC, 157223 tokens]
+│   ├── app/ [10957 LOC, 120261 tokens]
+│   │   ├── communities/ [300 LOC, 2278 tokens]
+│   │   │   ├── edit-community/ [160 LOC, 1171 tokens]
+│   │   │   │   └── [communityId]/ [160 LOC, 1171 tokens]
 │   │   │   │       └── [] page.tsx [160 LOC, 1171 tokens]
-│   │   │   ├── [communityId]/
+│   │   │   ├── [communityId]/ [91 LOC, 795 tokens]
 │   │   │   │   └── [] page.tsx [91 LOC, 795 tokens]
 │   │   │   └── [] page.tsx [49 LOC, 312 tokens]
-│   │   ├── options/
-│   │   │   ├── saved-posts/
+│   │   ├── options/ [1394 LOC, 11268 tokens]
+│   │   │   ├── saved-posts/ [86 LOC, 699 tokens]
 │   │   │   │   └── [] page.tsx [86 LOC, 699 tokens]
-│   │   │   ├── userdetails/
+│   │   │   ├── userdetails/ [337 LOC, 2441 tokens]
 │   │   │   │   └── [] page.tsx [337 LOC, 2441 tokens]
-│   │   │   ├── generative-ui/
+│   │   │   ├── generative-ui/ [678 LOC, 5601 tokens]
 │   │   │   │   ├── [] examplePrompts.ts [171 LOC, 1347 tokens]
 │   │   │   │   ├── [] utils.ts [109 LOC, 1035 tokens]
 │   │   │   │   ├── [] ComponentEditor.tsx [119 LOC, 972 tokens]
 │   │   │   │   ├── [] ElementRenderer.tsx [82 LOC, 665 tokens]
 │   │   │   │   └── [] page.tsx [197 LOC, 1582 tokens]
-│   │   │   ├── premium/
+│   │   │   ├── premium/ [122 LOC, 894 tokens]
 │   │   │   │   └── [] page.tsx [122 LOC, 894 tokens]
-│   │   │   ├── notifications/
+│   │   │   ├── notifications/ [110 LOC, 939 tokens]
 │   │   │   │   └── [] page.tsx [110 LOC, 939 tokens]
 │   │   │   └── [] page.tsx [61 LOC, 694 tokens]
-│   │   ├── search/
+│   │   ├── search/ [73 LOC, 531 tokens]
 │   │   │   └── [] page.tsx [73 LOC, 531 tokens]
-│   │   ├── services/
-│   │   │   ├── forms/
-│   │   │   │   └── [formId]/
-│   │   │   │       ├── fill/
-│   │   │   │       │   └── [] page.tsx [258 LOC, 2140 tokens]
-│   │   │   │       └── responses/
+│   │   ├── services/ [1327 LOC, 10264 tokens]
+│   │   │   ├── forms/ [464 LOC, 3583 tokens]
+│   │   │   │   └── [formId]/ [464 LOC, 3583 tokens]
+│   │   │   │       ├── fill/ [374 LOC, 2877 tokens]
+│   │   │   │       │   └── [] page.tsx [374 LOC, 2877 tokens]
+│   │   │   │       └── responses/ [90 LOC, 706 tokens]
 │   │   │   │           └── [] page.tsx [90 LOC, 706 tokens]
-│   │   │   ├── [serviceName]/
-│   │   │   │   ├── [subserviceName]/
-│   │   │   │   │   └── [] page.tsx [176 LOC, 1387 tokens]
+│   │   │   ├── [serviceName]/ [237 LOC, 1859 tokens]
+│   │   │   │   ├── [subserviceName]/ [179 LOC, 1422 tokens]
+│   │   │   │   │   └── [] page.tsx [179 LOC, 1422 tokens]
 │   │   │   │   └── [] page.tsx [58 LOC, 437 tokens]
-│   │   │   ├── [] ResponsesCard.tsx [72 LOC, 622 tokens]
-│   │   │   ├── [] ShortcutSettings.tsx [204 LOC, 1587 tokens]
-│   │   │   ├── [] ShortcutsContext.tsx [128 LOC, 872 tokens]
-│   │   │   ├── [] ShortcutBar.tsx [49 LOC, 355 tokens]
+│   │   │   ├── [] ResponsesCard.tsx [121 LOC, 1059 tokens]
+│   │   │   ├── [] ShortcutSettings.tsx [208 LOC, 1617 tokens]
+│   │   │   ├── [] ShortcutsContext.tsx [160 LOC, 1140 tokens]
+│   │   │   ├── [] ShortcutBar.tsx [49 LOC, 377 tokens]
 │   │   │   ├── [] useShortcuts.ts [49 LOC, 309 tokens]
 │   │   │   └── [] page.tsx [39 LOC, 320 tokens]
-│   │   ├── posts/
-│   │   │   ├── [id]/
+│   │   ├── posts/ [498 LOC, 4387 tokens]
+│   │   │   ├── [id]/ [299 LOC, 2597 tokens]
 │   │   │   │   └── [] page.tsx [299 LOC, 2597 tokens]
 │   │   │   └── [] CommentCard.tsx [199 LOC, 1790 tokens]
-│   │   ├── shop/
-│   │   │   ├── [userId]/
+│   │   ├── shop/ [869 LOC, 7624 tokens]
+│   │   │   ├── [userId]/ [90 LOC, 864 tokens]
 │   │   │   │   └── [] page.tsx [90 LOC, 864 tokens]
 │   │   │   ├── [] ShowCart.tsx [164 LOC, 1342 tokens]
 │   │   │   ├── [] ProductsTab.tsx [81 LOC, 1020 tokens]
@@ -143,31 +133,31 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   │   ├── [] Dashboard.tsx [44 LOC, 394 tokens]
 │   │   │   ├── [] OrdersTab.tsx [91 LOC, 878 tokens]
 │   │   │   └── [] page.tsx [130 LOC, 1012 tokens]
-│   │   ├── payment/
-│   │   │   └── callback/
-│   │   │       ├── verify/
+│   │   ├── payment/ [215 LOC, 1804 tokens]
+│   │   │   └── callback/ [215 LOC, 1804 tokens]
+│   │   │       ├── verify/ [23 LOC, 170 tokens]
 │   │   │       │   └── [] route.ts [23 LOC, 170 tokens]
 │   │   │       └── [] page.tsx [192 LOC, 1634 tokens]
-│   │   ├── markets/
-│   │   │   └── [marketId]/
+│   │   ├── markets/ [230 LOC, 1977 tokens]
+│   │   │   └── [marketId]/ [230 LOC, 1977 tokens]
 │   │   │       └── [] page.tsx [230 LOC, 1977 tokens]
-│   │   ├── create-post/
+│   │   ├── create-post/ [1121 LOC, 8282 tokens]
 │   │   │   ├── [] ServiceSelector.tsx [141 LOC, 1066 tokens]
 │   │   │   ├── [] CreateMarketForm.tsx [148 LOC, 1103 tokens]
 │   │   │   ├── [] CreateServicePage.tsx [354 LOC, 2429 tokens]
-│   │   │   ├── [] QuestionEditor.tsx [174 LOC, 1419 tokens]
-│   │   │   ├── [] FormPreview.tsx [82 LOC, 639 tokens]
+│   │   │   ├── [] QuestionEditor.tsx [181 LOC, 1478 tokens]
+│   │   │   ├── [] FormPreview.tsx [94 LOC, 732 tokens]
 │   │   │   └── [] page.tsx [203 LOC, 1474 tokens]
-│   │   ├── auth/
-│   │   │   ├── forgot-password/
+│   │   ├── auth/ [321 LOC, 2621 tokens]
+│   │   │   ├── forgot-password/ [58 LOC, 511 tokens]
 │   │   │   │   └── [] page.tsx [58 LOC, 511 tokens]
-│   │   │   ├── login/
+│   │   │   ├── login/ [84 LOC, 694 tokens]
 │   │   │   │   └── [] page.tsx [84 LOC, 694 tokens]
-│   │   │   ├── reset-password/
+│   │   │   ├── reset-password/ [83 LOC, 638 tokens]
 │   │   │   │   └── [] page.tsx [83 LOC, 638 tokens]
-│   │   │   └── register/
+│   │   │   └── register/ [96 LOC, 778 tokens]
 │   │   │       └── [] page.tsx [96 LOC, 778 tokens]
-│   │   ├── gigs/
+│   │   ├── gigs/ [1734 LOC, 14542 tokens]
 │   │   │   ├── [] calculatePrice.ts [88 LOC, 581 tokens]
 │   │   │   ├── [] useGigs.ts [250 LOC, 1974 tokens]
 │   │   │   ├── [] MapView.tsx [71 LOC, 703 tokens]
@@ -178,56 +168,62 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   │   │   ├── [] Addons.md [27 LOC, 272 tokens]
 │   │   │   ├── [] page.tsx [379 LOC, 3157 tokens]
 │   │   │   └── [] InteractiveMap.tsx [76 LOC, 499 tokens]
-│   │   ├── chats/
-│   │   │   ├── [userId]/
+│   │   ├── chats/ [580 LOC, 5185 tokens]
+│   │   │   ├── [userId]/ [432 LOC, 4078 tokens]
 │   │   │   │   └── [] page.tsx [432 LOC, 4078 tokens]
-│   │   │   └── [] page.tsx [140 LOC, 1042 tokens]
-│   │   ├── profile/
-│   │   │   ├── [userId]/
-│   │   │   │   ├── followers/
+│   │   │   └── [] page.tsx [148 LOC, 1107 tokens]
+│   │   ├── agent/ [447 LOC, 3715 tokens]
+│   │   │   └── [X] page.tsx [447 LOC, 3715 tokens]
+│   │   ├── profile/ [849 LOC, 6607 tokens]
+│   │   │   ├── [userId]/ [298 LOC, 2275 tokens]
+│   │   │   │   ├── followers/ [121 LOC, 853 tokens]
 │   │   │   │   │   └── [] page.tsx [121 LOC, 853 tokens]
 │   │   │   │   └── [] page.tsx [177 LOC, 1422 tokens]
 │   │   │   ├── [] CommunitiesList.tsx [250 LOC, 1866 tokens]
 │   │   │   ├── [] ProfileHeader.tsx [120 LOC, 954 tokens]
 │   │   │   └── [] page.tsx [181 LOC, 1512 tokens]
-│   │   ├── [] 3d-rocket.png [0 LOC, 0 tokens]
+│   │   ├── [] 3d-rocket.png [574 LOC, 35743 tokens]
 │   │   ├── [] globals.css [26 LOC, 144 tokens]
 │   │   ├── [] layout.tsx [53 LOC, 349 tokens]
 │   │   └── [] page.tsx [346 LOC, 2940 tokens]
-│   ├── components/
-│   │   ├── ui/
+│   ├── components/ [1450 LOC, 11555 tokens]
+│   │   ├── ui/ [204 LOC, 1260 tokens]
 │   │   │   ├── [] OptionsDrawer.tsx [128 LOC, 805 tokens]
 │   │   │   ├── [] Snackbar.tsx [31 LOC, 195 tokens]
 │   │   │   └── [] Tabs.tsx [45 LOC, 260 tokens]
+│   │   ├── agent/ [306 LOC, 2943 tokens]
+│   │   │   └── [X] AgentChat.tsx [306 LOC, 2943 tokens]
 │   │   ├── [] FormCard.tsx [85 LOC, 613 tokens]
-│   │   ├── [] TopAppBar.tsx [68 LOC, 612 tokens]
+│   │   ├── [] TopAppBar.tsx [97 LOC, 818 tokens]
 │   │   ├── [] PostCard.tsx [374 LOC, 2823 tokens]
 │   │   ├── [] MarketCard.tsx [75 LOC, 594 tokens]
 │   │   ├── [] FlowpayModal.tsx [179 LOC, 1329 tokens]
-│   │   ├── [] BottomAppBar.tsx [61 LOC, 572 tokens]
+│   │   ├── [] BottomAppBar.tsx [61 LOC, 573 tokens]
 │   │   └── [] PaymentModal.tsx [69 LOC, 602 tokens]
-│   ├── hooks/
+│   ├── hooks/ [393 LOC, 2819 tokens]
 │   │   ├── [] useGemini.ts [77 LOC, 502 tokens]
 │   │   └── [] usePayment.tsx [316 LOC, 2317 tokens]
-│   ├── context/
+│   ├── context/ [896 LOC, 5958 tokens]
 │   │   ├── [] NotificationContext.tsx [106 LOC, 745 tokens]
 │   │   ├── [] CartContext.tsx [78 LOC, 540 tokens]
 │   │   ├── [] SocketContext.tsx [64 LOC, 469 tokens]
 │   │   ├── [] AuthContext.tsx [110 LOC, 763 tokens]
+│   │   ├── [] AgentContext.tsx [407 LOC, 2446 tokens]
 │   │   └── [] PostContext.tsx [131 LOC, 995 tokens]
-│   ├── cypress/
-│   │   ├── support/
+│   ├── cypress/ [321 LOC, 2693 tokens]
+│   │   ├── support/ [62 LOC, 386 tokens]
 │   │   │   ├── [] commands.ts [29 LOC, 192 tokens]
 │   │   │   └── [] e2e.ts [33 LOC, 194 tokens]
-│   │   └── e2e/
+│   │   └── e2e/ [259 LOC, 2307 tokens]
 │   │       └── [] payment-flow.cy.ts [259 LOC, 2307 tokens]
-│   ├── lib/
+│   ├── lib/ [876 LOC, 11977 tokens]
 │   │   ├── [] utils.ts [64 LOC, 559 tokens]
 │   │   ├── [] api.ts [61 LOC, 691 tokens]
-│   │   ├── [] types.ts [205 LOC, 1151 tokens]
-│   │   ├── [] icons.tsx [200 LOC, 6490 tokens]
-│   │   ├── [] config.ts [7 LOC, 54 tokens]
-│   │   └── [] services-data.ts [41 LOC, 267 tokens]
+│   │   ├── [] types.ts [205 LOC, 1161 tokens]
+│   │   ├── [] icons.tsx [207 LOC, 6799 tokens]
+│   │   ├── [] config.ts [10 LOC, 102 tokens]
+│   │   ├── [X] agent.ts [114 LOC, 537 tokens]
+│   │   └── [] services-data.ts [215 LOC, 2128 tokens]
 │   ├── [] package.json [50 LOC, 493 tokens]
 │   ├── [] next.config.js [5 LOC, 32 tokens]
 │   ├── [] tsconfig.json [27 LOC, 183 tokens]
@@ -240,10 +236,11 @@ HighRisk: F059:formatLargeNumber🔴,F060:formatLargeNumber🔴,F063:useSocket�
 │   └── [] playwright.config.ts [45 LOC, 291 tokens]
 ├── [] package.json [8 LOC, 52 tokens]
 ├── [] cxt_switch.md [34 LOC, 423 tokens]
-├── [] agent_harness.md [53 LOC, 569 tokens]
-├── [] code_atlas.md [249 LOC, 3903 tokens]
-├── [] code_dump.txt [0 LOC, 0 tokens]
-├── [] README.md [193 LOC, 1379 tokens]
-├── [] project_tools.md [30 LOC, 1044 tokens]
-└── [] Issues and Fixes.md [0 LOC, 0 tokens]
+├── [] agent_harness.md [52 LOC, 501 tokens]
+├── [] code_atlas.md [239 LOC, 3798 tokens]
+├── [] ToDo.md [54 LOC, 566 tokens]
+├── code_dump.txt
+├── [] README.md [133 LOC, 790 tokens]
+├── [] project_tools.md [30 LOC, 1068 tokens]
+└── Issues and Fixes.md
 ### End Tree

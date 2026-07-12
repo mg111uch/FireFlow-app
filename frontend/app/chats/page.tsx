@@ -93,7 +93,15 @@ export default function ChatsPage() {
 
   return (
     <div className="container mx-auto p-2">
-      <h1 className="text-2xl font-bold mb-4">Chats</h1>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold">Chats</h1>
+        <button
+          onClick={() => router.push('/agent')}
+          className="bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-700"
+        >
+          Open Agent
+        </button>
+      </div>
 
       {conversations.length === 0 ? (
         <div className="text-center text-gray-400 py-10">

@@ -1,23 +1,22 @@
-# Project: Social and E-commerce app
-# AI Agent Development Guidelines 
+# Project Development Guidelines 
 
 ## TASK
 
-What changes are needed so that the back button in `React/reddit-clone/frontend/components/TopAppBar.tsx` always takes user one page up, not router back. Back button should always take user closer to main_tabs of `React/reddit-clone/frontend/components/BottomAppBar.tsx`.
+Check why in `reddit-clone/frontend/app/agent/page.tsx` starting a new session using /new slash command resets the selected model to default.
 
 Do not give code or make any changes, just a concise plan or answer.
 
 ## Code Execution & Validation Environment
 
-- **Command to Run combined App:** `cd /home/manigupt/Hello/React/reddit-clone && npm run app`.
-- **Command to Run only Backend:** `cd /home/manigupt/Hello/React/reddit-clone/backend && npm start`.
-- **Command to Run only Frontend:** `cd /home/manigupt/Hello/React/reddit-clone/frontend && npm run dev`.
-- **Command to Run Backend Test :** `cd /home/manigupt/Hello/React/reddit-clone/backend && npm test`
+- **Command to Run combined App:** `cd /home/manigupt/Hello/reddit-clone && npm run app`.
+- **Command to Run only Backend:** `cd /home/manigupt/Hello/reddit-clone/backend && npm start`.
+- **Command to Run only Frontend:** `cd /home/manigupt/Hello/reddit-clone/frontend && npm run dev`.
+- **Command to Run Backend Test :** `cd /home/manigupt/Hello/reddit-clone/backend && npm test`
 
 ## Project files
 
-- **Backend Source_code:** (Working directory) `/home/manigupt/Hello/React/reddit-clone/backend`
-- **Frontend Source_code:** (Working directory) `/home/manigupt/Hello/React/reddit-clone/frontend`
+- **Backend Source_code:** (Working directory) `/home/manigupt/Hello/reddit-clone/backend`
+- **Frontend Source_code:** (Working directory) `/home/manigupt/Hello/reddit-clone/frontend`
 
 ## Prerequisites
 
@@ -27,14 +26,14 @@ Do not give code or make any changes, just a concise plan or answer.
 
 ## Project related tools
 
-- **Tool usage command** `cd /home/manigupt/Hello/python/ai_agent/atlas_output && python run_cmds.py /home/manigupt/Hello/React/reddit-clone/project_tools.md <Tool_name>`
+- **Tool usage command** `cd /home/manigupt/Hello/Agentic_Unit_PIE/codebase/agent_tools/atlas_tools && python run_cmds.py /home/manigupt/Hello/reddit-clone/project_tools.md <Tool_name>`
 - **Tools available** (Tool_name)
     - Run and record video
     - Ask Gemini
 
 ## Rules
 
-- Do not ask to build the frontend unless user asks explicitly.
+- Do not build the frontend unless user asks explicitly.
 - Never read .env* files. Ask user for whatever changes you want to make in them.
 
 ## Core principles
