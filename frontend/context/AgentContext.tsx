@@ -16,6 +16,7 @@ interface AgentContextType {
   sessionActive: boolean;
   sendMessage: (content: string) => void;
   resetConversation: () => void;
+  sendCancel: () => void;
 }
 
 const AgentContext = createContext<AgentContextType | undefined>(undefined);
@@ -374,6 +375,17 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
     wsRef.current.send(JSON.stringify({ type: 'reset' }));
   }, []);
 
+  const sendCancel = useCallback(() => {
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+    wsRef.current.send(JSON.stringify({ type: 'cancel' }));
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.role === 'assistant' && m.isStreaming ? { ...m, isStreaming: false, isThinking: false } : m
+      )
+    );
+    setCurrentToolCall(null);
+  }, []);
+
   const isBusy =
     !!currentToolCall ||
     messages.some((m) => m.role === 'assistant' && m.isStreaming);
@@ -391,6 +403,7 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
         sessionActive,
         sendMessage,
         resetConversation,
+        sendCancel,
       }}
     >
       {children}

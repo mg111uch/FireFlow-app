@@ -204,14 +204,53 @@ function AgentHeader() {
   );
 }
 
+interface FileEntry {
+  name: string;
+  type: 'file' | 'dir';
+  children?: FileEntry[];
+  truncated?: boolean;
+}
+
+function flattenFileTree(entries: FileEntry[], prefix = ''): string[] {
+  const result: string[] = [];
+  for (const e of entries) {
+    const path = prefix ? `${prefix}/${e.name}` : e.name;
+    if (e.type === 'file') {
+      result.push(path);
+    }
+    if (e.children) {
+      result.push(...flattenFileTree(e.children, path));
+    }
+  }
+  return result;
+}
+
 function AgentInput() {
   const { sendMessage, connected, isBusy } = useAgent();
+  const { token } = useAuth();
   const [input, setInput] = useState('');
   const [slashOpen, setSlashOpen] = useState(false);
+  const [atMentionOpen, setAtMentionOpen] = useState(false);
+  const [filePaths, setFilePaths] = useState<string[]>([]);
+  const [filteredFiles, setFilteredFiles] = useState<string[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [atQuery, setAtQuery] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const atDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    axios.get(`${AGENT_API_URL}/api/files/tree`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then((res) => {
+      const tree = res.data?.tree;
+      if (tree?.children) {
+        setFilePaths(flattenFileTree(tree.children));
+      }
+    }).catch(() => {});
+  }, [token]);
 
   const resizeTextarea = useCallback(() => {
     const el = textareaRef.current;
@@ -247,6 +286,13 @@ function AgentInput() {
     return SLASH_COMMANDS.filter((c) => c.command.startsWith(partial));
   };
 
+  const getAtQuery = (text: string): string | null => {
+    const caretPos = textareaRef.current?.selectionStart ?? text.length;
+    const beforeCaret = text.slice(0, caretPos);
+    const atMatch = beforeCaret.match(/@([\w/.-]*)$/);
+    return atMatch ? atMatch[1] : null;
+  };
+
   const updateSlashState = (text: string) => {
     const filtered = getFilteredCommands(text);
     if (filtered.length > 0) {
@@ -254,6 +300,21 @@ function AgentInput() {
       setSelectedIndex((prev) => Math.min(prev, filtered.length - 1));
     } else {
       setSlashOpen(false);
+    }
+  };
+
+  const updateAtMentionState = (text: string) => {
+    const query = getAtQuery(text);
+    if (query !== null && filePaths.length > 0) {
+      const filtered = query
+        ? filePaths.filter((p) => p.toLowerCase().includes(query.toLowerCase()))
+        : filePaths;
+      setFilteredFiles(filtered.slice(0, 20));
+      setAtQuery(query ?? '');
+      setAtMentionOpen(filtered.length > 0);
+      setSelectedIndex((prev) => Math.min(prev, filtered.length - 1));
+    } else {
+      setAtMentionOpen(false);
     }
   };
 
@@ -267,6 +328,25 @@ function AgentInput() {
       textareaRef.current.style.height = 'auto';
     }
     requestAnimationFrame(() => textareaRef.current?.focus());
+  };
+
+  const insertAtText = (text: string) => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const caretPos = el.selectionStart ?? input.length;
+    const beforeCaret = input.slice(0, caretPos);
+    const afterCaret = input.slice(caretPos);
+    const atMatch = beforeCaret.match(/^(.*)@[\w/.-]*$/);
+    if (atMatch) {
+      const newInput = atMatch[1] + text + ' ' + afterCaret;
+      setInput(newInput);
+      el.value = newInput;
+      const newPos = atMatch[1].length + text.length + 1;
+      el.setSelectionRange(newPos, newPos);
+    }
+    setAtMentionOpen(false);
+    resizeTextarea();
+    el.focus();
   };
 
   const selectCommand = (cmd: string) => {
@@ -284,6 +364,7 @@ function AgentInput() {
     const text = e.target.value;
     setInput(text);
     updateSlashState(text);
+    updateAtMentionState(text);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -313,6 +394,30 @@ function AgentInput() {
       }
     }
 
+    if (atMentionOpen) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedIndex((prev) => Math.min(prev + 1, filteredFiles.length - 1));
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex((prev) => Math.max(prev - 1, 0));
+        return;
+      }
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        if (filteredFiles[selectedIndex]) {
+          insertAtText(filteredFiles[selectedIndex]);
+        }
+        return;
+      }
+      if (e.key === 'Escape') {
+        setAtMentionOpen(false);
+        return;
+      }
+    }
+
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       submit();
@@ -327,6 +432,7 @@ function AgentInput() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setAtMentionOpen(false);
     submit();
   };
 
@@ -342,6 +448,39 @@ function AgentInput() {
               : 'border-zinc-800 opacity-80'
           }`}
         >
+          {atMentionOpen && filteredFiles.length > 0 && (
+            <div
+              ref={atDropdownRef}
+              className="absolute bottom-full left-0 right-0 z-20 mb-1 overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900 shadow-xl shadow-black/40"
+            >
+              <div className="border-b border-zinc-800 px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-zinc-500">
+                Files
+              </div>
+              <div className="max-h-48 overflow-y-auto">
+                {filteredFiles.map((fp, i) => (
+                  <button
+                    key={fp}
+                    type="button"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      insertAtText(fp);
+                    }}
+                    onMouseEnter={() => setSelectedIndex(i)}
+                    className={`flex w-full items-center gap-2 px-4 py-2 text-left font-mono text-xs transition-colors ${
+                      i === selectedIndex
+                        ? 'bg-zinc-700/80 text-zinc-100'
+                        : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
+                    }`}
+                  >
+                    <svg className="h-3 w-3 shrink-0 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    {fp}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {slashOpen && filteredCommands.length > 0 && (
             <div
               ref={dropdownRef}

@@ -224,6 +224,27 @@ const SLASH_SUGGESTIONS = [
   '/auto Why is population declining?',
 ];
 
+function StopButton() {
+  const { sendCancel, isBusy } = useAgent();
+
+  if (!isBusy) return null;
+
+  return (
+    <div className="sticky bottom-4 z-20 flex justify-center">
+      <button
+        type="button"
+        onClick={sendCancel}
+        className="flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-300 transition-colors hover:bg-red-500/20 hover:text-red-200 shadow-lg shadow-black/30 backdrop-blur-md"
+      >
+        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M6 6h12v12H6z" />
+        </svg>
+        Stop generation
+      </button>
+    </div>
+  );
+}
+
 export default function AgentChat() {
   const { messages, error, currentToolCall, connected, sendMessage } = useAgent();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -323,6 +344,7 @@ export default function AgentChat() {
 
         <div ref={messagesEndRef} className="h-1" />
       </div>
+      <StopButton />
     </div>
   );
 }
