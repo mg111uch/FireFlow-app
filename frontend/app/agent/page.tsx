@@ -226,7 +226,7 @@ function flattenFileTree(entries: FileEntry[], prefix = ''): string[] {
 }
 
 function AgentInput() {
-  const { sendMessage, connected, isBusy } = useAgent();
+  const { sendMessage, sendCancel, connected, isBusy } = useAgent();
   const { token } = useAuth();
   const [input, setInput] = useState('');
   const [slashOpen, setSlashOpen] = useState(false);
@@ -564,16 +564,29 @@ function AgentInput() {
               {connected ? (isBusy ? 'Busy' : 'Ready') : 'Offline'}
             </p>
 
-            <button
-              type="submit"
-              disabled={!connected || !input.trim() || isBusy}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-600 text-white transition-colors hover:bg-sky-500 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-500"
-              aria-label="Send message"
-            >
-              <span className="scale-75">
-                <SendIcon />
-              </span>
-            </button>
+            {isBusy ? (
+              <button
+                type="button"
+                onClick={sendCancel}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-600 text-white transition-colors hover:bg-red-500"
+                aria-label="Stop generation"
+              >
+                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 6h12v12H6z" />
+                </svg>
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={!connected || !input.trim()}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sky-600 text-white transition-colors hover:bg-sky-500 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-500"
+                aria-label="Send message"
+              >
+                <span className="scale-75">
+                  <SendIcon />
+                </span>
+              </button>
+            )}
           </div>
         </div>
       </form>

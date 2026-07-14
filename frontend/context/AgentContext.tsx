@@ -124,7 +124,7 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
             setMessages((prev) =>
               updateLastAssistant(prev, (m) => {
                 const existing = m.toolCalls || [];
-                const idx = existing.findIndex((c) => c.step === data.step);
+                const idx = existing.findIndex((c) => c.step === data.step && c.tool === data.tool);
                 const toolCalls =
                   idx >= 0
                     ? existing.map((c, i) => (i === idx ? tc : c))
@@ -143,15 +143,15 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
           case 'tool_result': {
             const input = formatToolInput(data.input ?? '');
             setCurrentToolCall((prev) =>
-              prev?.step === data.step
+              prev?.step === data.step && prev?.tool === data.tool
                 ? { ...prev, result: data.result, input: input || prev.input }
                 : prev
             );
             setMessages((prev) =>
               updateLastAssistant(prev, (m) => {
                 const existing = m.toolCalls || [];
-                const idx = existing.findIndex((c) => c.step === data.step);
-                let toolCalls: ToolCall[];
+                const idx = existing.findIndex((c) => c.step === data.step && c.tool === data.tool);
+                        let toolCalls: ToolCall[];
                 if (idx >= 0) {
                   toolCalls = existing.map((c, i) =>
                     i === idx

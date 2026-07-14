@@ -65,6 +65,7 @@ function ToolCallCard({ toolCall }: { toolCall: ToolCall }) {
   const done = !!toolCall.result;
 
   const isPathTool =
+    toolCall.tool === 'read_file' || toolCall.tool === 'list_files' ||
     toolCall.tool === 'edit_file' || toolCall.tool === 'write_to_file';
 
   let inlineValue: string | null = null;
@@ -218,32 +219,6 @@ const SUGGESTIONS = [
   'Write tests for a module',
 ];
 
-const SLASH_SUGGESTIONS = [
-  '/new',
-  '/argu explore theism_atheism',
-  '/auto Why is population declining?',
-];
-
-function StopButton() {
-  const { sendCancel, isBusy } = useAgent();
-
-  if (!isBusy) return null;
-
-  return (
-    <div className="sticky bottom-4 z-20 flex justify-center">
-      <button
-        type="button"
-        onClick={sendCancel}
-        className="flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-300 transition-colors hover:bg-red-500/20 hover:text-red-200 shadow-lg shadow-black/30 backdrop-blur-md"
-      >
-        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M6 6h12v12H6z" />
-        </svg>
-        Stop generation
-      </button>
-    </div>
-  );
-}
 
 export default function AgentChat() {
   const { messages, error, currentToolCall, connected, sendMessage } = useAgent();
@@ -306,26 +281,7 @@ export default function AgentChat() {
                 </button>
               ))}
             </div>
-            {SLASH_SUGGESTIONS.length > 0 && (
-              <div className="mt-6 w-full max-w-md">
-                <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-zinc-600">
-                  Slash Commands
-                </p>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {SLASH_SUGGESTIONS.map((text) => (
-                    <button
-                      key={text}
-                      type="button"
-                      disabled={!connected}
-                      onClick={() => sendMessage(text)}
-                      className="rounded-full border border-zinc-800 bg-zinc-900/80 px-3.5 py-1.5 text-xs font-mono text-zinc-400 transition-colors hover:border-zinc-700 hover:bg-zinc-800 hover:text-zinc-200 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {text}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+
           </div>
         )}
 
@@ -344,7 +300,6 @@ export default function AgentChat() {
 
         <div ref={messagesEndRef} className="h-1" />
       </div>
-      <StopButton />
     </div>
   );
 }
