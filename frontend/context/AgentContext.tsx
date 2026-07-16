@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { AGENT_WS_URL } from '@/lib/config';
-import type { AgentMessage, ToolCall, WsMessage } from '@/lib/agent';
+import type { AgentMessage, ToolCall, WsMessage, AgentQuestion } from '@/lib/agent';
 import { formatToolInput } from '@/lib/agent';
 
 interface AgentContextType {
@@ -14,9 +14,12 @@ interface AgentContextType {
   isBusy: boolean;
   /** True after the first user message until /new (or reset) */
   sessionActive: boolean;
+  pendingQuestions: AgentQuestion[] | null;
+  llmCallActive: boolean;
   sendMessage: (content: string) => void;
   resetConversation: () => void;
   sendCancel: () => void;
+  submitQuestionAnswer: (answers: string[]) => void;
 }
 
 const AgentContext = createContext<AgentContextType | undefined>(undefined);
@@ -55,6 +58,8 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [currentToolCall, setCurrentToolCall] = useState<ToolCall | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pendingQuestions, setPendingQuestions] = useState<AgentQuestion[] | null>(null);
+  const [llmCallActive, setLlmCallActive] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const tokenRef = useRef(token);
@@ -198,14 +203,16 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
 
           case 'final':
             setCurrentToolCall(null);
+            setPendingQuestions(null);
             setMessages((prev) => {
+              const finalContent = data.full_content || data.content || '';
               const last = prev[prev.length - 1];
               if (last?.role === 'assistant' && last.isStreaming) {
                 return prev.map((m, i) =>
                   i === prev.length - 1
                     ? {
                         ...m,
-                        content: data.content ? m.content + data.content : m.content,
+                        content: m.content || finalContent,
                         isStreaming: false,
                         isThinking: false,
                       }
@@ -217,7 +224,7 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
                 {
                   id: `assistant-${Date.now()}`,
                   role: 'assistant',
-                  content: data.content || '',
+                  content: finalContent,
                   timestamp: Date.now(),
                   toolCalls: [],
                   isStreaming: false,
@@ -250,10 +257,20 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
             });
             break;
 
+          case 'llm_call':
+            setLlmCallActive(data.status === 'start');
+            break;
+
+          case 'question':
+            setCurrentToolCall(null);
+            setPendingQuestions(data.questions);
+            break;
+
           case 'reset':
             setMessages([]);
             setCurrentToolCall(null);
             setError(null);
+            setPendingQuestions(null);
             break;
         }
       } catch (err) {
@@ -375,6 +392,12 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
     wsRef.current.send(JSON.stringify({ type: 'reset' }));
   }, []);
 
+  const submitQuestionAnswer = useCallback((answers: string[]) => {
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+    wsRef.current.send(JSON.stringify({ type: 'question_answer', answers }));
+    setPendingQuestions(null);
+  }, []);
+
   const sendCancel = useCallback(() => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
     wsRef.current.send(JSON.stringify({ type: 'cancel' }));
@@ -384,10 +407,12 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
       )
     );
     setCurrentToolCall(null);
+    setPendingQuestions(null);
   }, []);
 
   const isBusy =
     !!currentToolCall ||
+    !!pendingQuestions ||
     messages.some((m) => m.role === 'assistant' && m.isStreaming);
 
   const sessionActive = messages.some((m) => m.role === 'user');
@@ -401,9 +426,12 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
         error,
         isBusy,
         sessionActive,
+        pendingQuestions,
+        llmCallActive,
         sendMessage,
         resetConversation,
         sendCancel,
+        submitQuestionAnswer,
       }}
     >
       {children}

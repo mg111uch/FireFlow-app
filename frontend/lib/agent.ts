@@ -76,6 +76,17 @@ export interface WsPing {
   type: 'ping';
 }
 
+export interface WsQuestion {
+  type: 'question';
+  questions: AgentQuestion[];
+  step: number;
+}
+
+export interface AgentQuestion {
+  question: string;
+  options?: string[];
+}
+
 export type WsMessage =
   | WsConnected
   | WsStatus
@@ -85,7 +96,8 @@ export type WsMessage =
   | WsFinal
   | WsError
   | WsReset
-  | WsPing;
+  | WsPing
+  | WsQuestion;
 
 export interface ProviderInfo {
   provider: string;

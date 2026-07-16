@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAgent } from '@/context/AgentContext';
 import type { AgentMessage, ToolCall } from '@/lib/agent';
+import QuestionPanel from './QuestionPanel';
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -221,7 +222,7 @@ const SUGGESTIONS = [
 
 
 export default function AgentChat() {
-  const { messages, error, currentToolCall, connected, sendMessage } = useAgent();
+  const { messages, error, currentToolCall, connected, sendMessage, pendingQuestions, submitQuestionAnswer } = useAgent();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -288,6 +289,13 @@ export default function AgentChat() {
         {messages.map((msg) => (
           <MessageBlock key={msg.id} message={msg} />
         ))}
+
+        {pendingQuestions && (
+          <QuestionPanel
+            questions={pendingQuestions}
+            onSubmit={submitQuestionAnswer}
+          />
+        )}
 
         {currentToolCall && !currentToolCall.result && (
           <div className="mb-4">
