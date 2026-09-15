@@ -52,3 +52,4 @@ Offline support (basic caching).
 Dark mode + accessibility.
 
 - Growth Ideas: Invite system, referral rewards (free premium credits). Community challenges with voting.
+

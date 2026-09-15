@@ -57,5 +57,6 @@ app.use(cors({
 app.use(express.json());
 app.use(optionalAuthenticateToken);
 app.use('/api-uploads', express.static(path.join(__dirname, '')));
+app.use('/api/pie', require('./pie/gateway'));
 
 module.exports = app;

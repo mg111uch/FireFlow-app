@@ -1,6 +1,8 @@
 const express = require('express');
 const db = require('../database');
 const { authenticateToken, optionalAuthenticateToken } = require('../middleware/auth');
+const { recordPayment, rupeesToPaise } = require('../lib/ledger');
+const { requireWorkerVerified } = require('../lib/verification');
 
 module.exports = (io, onlineUsers) => {
   const router = express.Router();
@@ -107,7 +109,7 @@ router.get('/:id', optionalAuthenticateToken, (req, res) => {
 });
 
 router.post('/', authenticateToken, (req, res) => {
-  const { type, vehicle_type, pickup_address, pickup_lat, pickup_lng, dropoff_address, dropoff_lat, dropoff_lng, distance, details, price } = req.body;
+  const { type, vehicle_type, pickup_address, pickup_lat, pickup_lng, dropoff_address, dropoff_lat, dropoff_lng, distance, details, price, engagement_type, terms_ref } = req.body;
   const userId = req.user.id;
   const payoutPrice = Math.round(price * 0.8 * 100) / 100;
 
@@ -119,12 +121,18 @@ router.post('/', authenticateToken, (req, res) => {
     return res.status(400).json({ error: 'Type must be ride or delivery' });
   }
 
+  // B4: poster declares the engagement class; accepting the gig accepts it.
+  const eng = engagement_type || '';
+  if (eng && !['gig', 'contract', 'trial'].includes(eng)) {
+    return res.status(400).json({ error: "engagement_type must be 'gig', 'contract' or 'trial'" });
+  }
+
   const detailsJson = details ? JSON.stringify(details) : null;
 
   db.run(`
-    INSERT INTO gigs (type, vehicle_type, pickup_address, pickup_lat, pickup_lng, dropoff_address, dropoff_lat, dropoff_lng, distance, details, price, payout_price, user_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `, [type, vehicle_type || null, pickup_address, pickup_lat || null, pickup_lng || null, dropoff_address, dropoff_lat || null, dropoff_lng || null, distance || null, detailsJson, price, payoutPrice, userId], function(err) {
+    INSERT INTO gigs (type, vehicle_type, pickup_address, pickup_lat, pickup_lng, dropoff_address, dropoff_lat, dropoff_lng, distance, details, price, payout_price, user_id, engagement_type, terms_ref)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `, [type, vehicle_type || null, pickup_address, pickup_lat || null, pickup_lng || null, dropoff_address, dropoff_lat || null, dropoff_lng || null, distance || null, detailsJson, price, payoutPrice, userId, eng, typeof terms_ref === 'string' ? terms_ref : ''], function(err) {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
@@ -232,12 +240,24 @@ router.post('/:id/pay', authenticateToken, (req, res) => {
         if (updatedGig.details) {
           updatedGig.details = JSON.parse(updatedGig.details);
         }
-        
-        if (io) {
-          io.emit('gigUpdated', updatedGig);
-        }
-        
-        res.json(updatedGig);
+
+        // Gig verification gate (FF-C): driver must own a verified unit.
+        // Single ledger book (A7): payout recorded before responding.
+        // The priced-in spread (price - payout) lands as platform rake (D1).
+        requireWorkerVerified(updatedGig.driver_id, res, () =>
+        recordPayment({ grossPaise: rupeesToPaise(updatedGig.price),
+          rakePaise: rupeesToPaise(updatedGig.price) - rupeesToPaise(updatedGig.payout_price || updatedGig.price),
+          fromUser: updatedGig.user_id, toUser: updatedGig.driver_id,
+          refType: 'gig', refId: updatedGig.id, memo: 'gig payout', by: userId }, (lErr) => {
+            if (lErr) {
+              return res.status(500).json({ error: lErr.message });
+            }
+            if (io) {
+              io.emit('gigUpdated', updatedGig);
+            }
+
+            res.json(updatedGig);
+          }));
       });
     });
   });

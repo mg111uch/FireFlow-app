@@ -2,18 +2,18 @@
 
 - **Make Codebase_atlas:** `cd /home/manigupt/Hello/Agentic_Unit_PIE/atlas_output && conda run -n myenv python -m codebase_atlas.main --project-dir /home/manigupt/Hello/reddit-clone --output-dir /home/manigupt/Hello/reddit-clone`
 
-- **Add markers:** `cd /home/manigupt/Hello/Agentic_Unit_PIE/codebase/agent_tools/atlas_tools && python add_markers.py --md_file /home/manigupt/Hello/reddit-clone/code_atlas.md --project_path "/home/manigupt/Hello/reddit-clone"`
+- **Add markers:** `cd /home/manigupt/Hello/Agentic_Unit_PIE/codebase/agent_tools/atlas_tools && python add_markers.py --md_file /home/manigupt/Hello/reddit-clone/codefiles_map.md --project_path "/home/manigupt/Hello/reddit-clone"`
 
-- **Codebase size:** `cd /home/manigupt/Hello/Agentic_Unit_PIE/codebase/agent_tools/atlas_tools && conda run -n myenv python codebase_size.py --directory /home/manigupt/Hello/reddit-clone --extensions .js .ts .tsx .json --output-file /home/manigupt/Hello/reddit-clone/code_atlas.md --start-marker "## Codebase size" --end-marker "## End Codebase size" --ignore-dir node_modules .git .next .swc public images uploads screenshots --ignore-files package-lock.json .gitignore .env .env.local tsconfig.tsbuildinfo postcss.config.mjs next-env.d.ts favicon.ico`
+- **Codebase size:** `cd /home/manigupt/Hello/Agentic_Unit_PIE/codebase/agent_tools/atlas_tools && conda run -n myenv python codebase_size.py --directory /home/manigupt/Hello/reddit-clone --extensions .js .ts .tsx .json --output-file /home/manigupt/Hello/reddit-clone/codefiles_map.md --start-marker "## Codebase size" --end-marker "## End Codebase size" --ignore-dir node_modules .git .next .swc public images uploads screenshots --ignore-files package-lock.json .gitignore .env .env.local tsconfig.tsbuildinfo postcss.config.mjs next-env.d.ts favicon.ico`
 
 - **Make directory:** 
-`cd /home/manigupt/Hello/Agentic_Unit_PIE/codebase/agent_tools/atlas_tools && conda run -n myenv python make_directree.py --reverse --base_path /home/manigupt/Hello/reddit-clone --md_file /home/manigupt/Hello/reddit-clone/code_atlas.md --start_marker '### FILE_MAP Tree' --end_marker '### End Tree' --ignore_dir node_modules .git .next .swc public images uploads screenshots --ignore_files package-lock.json .gitignore .env .env.local tsconfig.tsbuildinfo postcss.config.mjs next-env.d.ts favicon.ico`
+`cd /home/manigupt/Hello/Agentic_Unit_PIE/codebase/agent_tools/atlas_tools && conda run -n myenv python make_directree.py --reverse --base_path /home/manigupt/Hello/reddit-clone --md_file /home/manigupt/Hello/reddit-clone/codefiles_map.md --start_marker '### FILE_MAP Tree' --end_marker '### End Tree' --ignore_dir node_modules .git .next .swc public images uploads screenshots --ignore_files package-lock.json .gitignore .env .env.local tsconfig.tsbuildinfo postcss.config.mjs next-env.d.ts favicon.ico reddit_clone.db`
 
-- **Copy Content:** `cd /home/manigupt/Hello/Agentic_Unit_PIE/codebase/agent_tools/atlas_tools && conda run -n myenv python copyContent.py --mode dump --md_file /home/manigupt/Hello/reddit-clone/code_atlas.md --base_path /home/manigupt/Hello/reddit-clone --output_file /home/manigupt/Hello/reddit-clone/code_dump.txt --start_marker '### FILE_MAP Tree' --end_marker '### End Tree'`
+- **Copy Content:** `cd /home/manigupt/Hello/Agentic_Unit_PIE/codebase/agent_tools/atlas_tools && conda run -n myenv python copyContent.py --mode dump --md_file /home/manigupt/Hello/reddit-clone/codefiles_map.md --base_path /home/manigupt/Hello/reddit-clone --output_file /home/manigupt/Hello/Agentic_Unit_PIE/generated_reports/code_dump.txt --start_marker '### FILE_MAP Tree' --end_marker '### End Tree'`
 
-- **Count Tokens in file:** `cd /home/manigupt/Hello/Agentic_Unit_PIE/codebase/agent_tools/atlas_tools && conda run -n myenv python token_count.py /home/manigupt/Hello/reddit-clone/code_atlas.md`
+- **Count Tokens in file:** `cd /home/manigupt/Hello/Agentic_Unit_PIE/codebase/agent_tools/atlas_tools && conda run -n myenv python token_count.py /home/manigupt/Hello/reddit-clone/codefiles_map.md`
 
-- **Check if file exists:** `cd /home/manigupt/Hello/Agentic_Unit_PIE/codebase/agent_tools/atlas_tools && conda run -n myenv python path_file_exists.py /home/manigupt/Hello/reddit-clone/code_atlas.md`
+- **Check if file exists:** `cd /home/manigupt/Hello/Agentic_Unit_PIE/codebase/agent_tools/atlas_tools && conda run -n myenv python path_file_exists.py /home/manigupt/Hello/reddit-clone/codefiles_map.md`
 
 - **Navigate test flow:** `cd /home/manigupt/Hello/Agentic_Unit_PIE/codebase/agent_tools && conda run -n myenv python navigation.py --test_md_file /home/manigupt/Hello/reddit-clone/tests/send_msg.md`
 

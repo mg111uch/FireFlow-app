@@ -14,7 +14,10 @@ module.exports = [
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       )
     `,
-    migrations: []
+    migrations: [
+      'ALTER TABLE agent_api_keys ADD COLUMN unit_id TEXT',
+      'ALTER TABLE agent_api_keys ADD COLUMN spend_limit_paise INTEGER'
+    ]
   },
   {
     name: 'password_resets',

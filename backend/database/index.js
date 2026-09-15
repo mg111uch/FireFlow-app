@@ -10,6 +10,23 @@ const marketplace = require('./schema/marketplace');
 const payments = require('./schema/payments');
 const gigs = require('./schema/gigs');
 const auth = require('./schema/auth');
+const units = require('./schema/units');
+const opportunities = require('./schema/opportunities');
+const tasks = require('./schema/tasks');
+const contracts = require('./schema/contracts');
+const reputation = require('./schema/reputation');
+const ledger = require('./schema/ledger');
+const businesses = require('./schema/businesses');
+const referrals = require('./schema/referrals');
+const twin = require('./schema/twin');
+const agents = require('./schema/agents');
+const datasets = require('./schema/datasets');
+const compute = require('./schema/compute');
+const observations = require('./schema/observations');
+const decisions = require('./schema/decisions');
+const signals = require('./schema/signals');
+const ventures = require('./schema/ventures');
+const exportsSchema = require('./schema/exports');
 
 const SCHEMA_MODULES = [
   users,
@@ -20,7 +37,24 @@ const SCHEMA_MODULES = [
   marketplace,
   payments,
   gigs,
-  auth
+  auth,
+  units,
+  opportunities,
+  tasks,
+  contracts,
+  reputation,
+  ledger,
+  businesses,
+  referrals,
+  twin,
+  agents,
+  datasets,
+  compute,
+  observations,
+  decisions,
+  signals,
+  ventures,
+  exportsSchema
 ];
 
 function flattenSchema(modules) {

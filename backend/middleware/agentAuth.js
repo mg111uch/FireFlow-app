@@ -54,7 +54,9 @@ const authenticateAgentApiKey = (req, res, next) => {
         userId: keyRecord.user_id,
         username: keyRecord.username,
         permissions: keyRecord.permissions,
-        keyName: keyRecord.key_name
+        keyName: keyRecord.key_name,
+        unitId: keyRecord.unit_id || null,
+        spendLimitPaise: keyRecord.spend_limit_paise ?? null
       };
 
       next();

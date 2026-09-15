@@ -46,6 +46,22 @@ app.use('/api/shops', require('./routes/shops'));
 app.use('/api/shop-products', require('./routes/shop-products'));
 app.use('/api/shop-orders', require('./routes/shop-orders'));
 app.use('/api/gigs', require('./routes/gigs')(io, onlineUsers));
+app.use('/api/modules', require('./routes/modules')(app));
+app.use('/api/units', require('./routes/units')(io, onlineUsers));
+app.use('/api/opportunities', require('./routes/opportunities')(io, onlineUsers));
+app.use('/api/tasks', require('./routes/tasks')(io, onlineUsers));
+app.use('/api/contracts', require('./routes/contracts')(io, onlineUsers));
+app.use('/api/reputation', require('./routes/reputation')(io, onlineUsers));
+app.use('/api/ledger', require('./routes/ledger')(io, onlineUsers));
+app.use('/api/businesses', require('./routes/businesses')(io, onlineUsers));
+app.use('/api/referrals', require('./routes/referrals')(io, onlineUsers));
+app.use('/api/datasets', require('./routes/datasets')(io, onlineUsers));
+app.use('/api/compute', require('./routes/compute')(io, onlineUsers));
+app.use('/api/observations', require('./routes/observations')(io, onlineUsers));
+app.use('/api/decisions', require('./routes/decisions')(io, onlineUsers));
+app.use('/api/signals', require('./routes/signals')(io, onlineUsers));
+app.use('/api/ventures', require('./routes/ventures')(io, onlineUsers));
+app.use('/api/exports', require('./routes/exports')(io, onlineUsers));
 
 // Additional routes
 app.get('/api/search', (req, res) => {

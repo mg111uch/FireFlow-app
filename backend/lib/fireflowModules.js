@@ -1,0 +1,43 @@
+// fireflowModules.js — FireFlow A2 module registry (units-only slice).
+// implemented = live routes + schema; pending = registry entry only.
+// signature = distinctive inner route paths proving the mount is live.
+const MODULES = {
+  units: { status: 'implemented', routes: ['/api/units'],
+    schema: 'database/schema/units.js',
+    signature: ['/:id/gigs', '/type/:unitType'],
+    notes: 'Economic identity as Units (A1).' },
+  tasks: { status: 'implemented', routes: ['/api/gigs', '/api/tasks'],
+    schema: 'database/schema/tasks.js (+ gigs.js legacy)',
+    signature: ['/:id/accept', '/:id/claim'],
+    notes: 'Tasks marketplace (A3): publish->claim->complete->pay; gigs stay as-is.' },
+  markets: { status: 'implemented', routes: ['/api/markets', '/api/datasets', '/api/compute', '/api/exports'],
+    schema: 'database/schema/markets.js + datasets.js + compute.js + exports.js',
+    signature: ['/:marketId/trade', '/:id/request', '/workloads'],
+    notes: 'Exchange surfaces: prediction, data (consent-first), compute (published workloads), export orders.' },
+  payments: { status: 'implemented', routes: ['/api/payments', '/api/flowpay', '/api/ledger'],
+    schema: 'database/schema/payments.js + database/schema/ledger.js (single book)',
+    signature: ['/create-order', '/register'],
+    notes: 'Cash books + gates. All task/gig/contract payouts land in ledger (A7).' },
+  agent_accounts: { status: 'implemented', routes: ['/api/agent'],
+    schema: 'database/schema/auth.js (agent_api_keys + unit bind + spend cap)',
+    signature: ['/keys', '/test'],
+    notes: 'Credentials bound to AI Agent units (A8); supervised spend caps enforced on propose.' },
+  opportunities: { status: 'implemented', routes: ['/api/opportunities'],
+    schema: 'database/schema/opportunities.js',
+    signature: ['/:id/score', '/:id/challenge'],
+    notes: 'Scored demand (A4). Thin proxy: PIE scoring.py is single source.' },
+  contracts: { status: 'implemented', routes: ['/api/contracts'],
+    schema: 'database/schema/contracts.js',
+    signature: ['/:id/lock', '/:id/release'],
+    notes: 'Agreements + escrow (A6): lock on claim, release on completion.' },
+  reputation: { status: 'implemented', routes: ['/api/reputation'],
+    schema: 'database/schema/reputation.js',
+    signature: ['/ratings', '/attestations'],
+    notes: 'Verification + ratings (A5): payout gate via verified units.' },
+  businesses: { status: 'implemented', routes: ['/api/businesses'],
+    schema: 'database/schema/businesses.js',
+    signature: ['/unit/:unitId', '/search'],
+    notes: 'Business profiles (A8) + C1 capability search via PIE industrial proxy.' },
+};
+
+module.exports = { MODULES };

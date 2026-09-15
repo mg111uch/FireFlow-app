@@ -25,7 +25,9 @@ module.exports = [
       'ALTER TABLE gigs ADD COLUMN vehicle_type TEXT',
       'ALTER TABLE gigs ADD COLUMN distance REAL',
       'ALTER TABLE gigs ADD COLUMN payout_price REAL',
-      'ALTER TABLE gigs ADD COLUMN is_paid INTEGER DEFAULT 0'
+      'ALTER TABLE gigs ADD COLUMN is_paid INTEGER DEFAULT 0',
+      'ALTER TABLE gigs ADD COLUMN engagement_type TEXT DEFAULT \'\'',
+      'ALTER TABLE gigs ADD COLUMN terms_ref TEXT DEFAULT \'\''
     ]
   }
 ];

@@ -1,11 +1,3 @@
-# Project Development Guidelines 
-
-## TASK
-
-Check why in `reddit-clone/frontend/app/agent/page.tsx` starting a new session using /new slash command resets the selected model to default.
-
-Do not give code or make any changes, just a concise plan or answer.
-
 ## Code Execution & Validation Environment
 
 - **Command to Run combined App:** `cd /home/manigupt/Hello/reddit-clone && npm run app`.
